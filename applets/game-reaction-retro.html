@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blitz-Tipper — Retro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0a1e; --panel: #1a1440; --ink: #f2eee0; --ink-dim: #a79fd6;
+    --accent: #ff4d6d; --gold: #ffd23f; --teal: #2ec4a6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'VT323', monospace; height: 100vh; overflow: hidden; }
+  .hud {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px; font-family: 'Press Start 2P', monospace; font-size: 12px;
+  }
+  .hud .score { color: var(--teal); }
+  .hud .timer { color: var(--gold); }
+  .arena {
+    position: relative; width: 100%; height: calc(100vh - 56px);
+    background:
+      linear-gradient(0deg, transparent 24%, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.03) 26%, transparent 27%, transparent 74%, rgba(255,255,255,0.03) 75%, rgba(255,255,255,0.03) 76%, transparent 77%),
+      linear-gradient(90deg, transparent 24%, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.03) 26%, transparent 27%, transparent 74%, rgba(255,255,255,0.03) 75%, rgba(255,255,255,0.03) 76%, transparent 77%);
+    background-size: 40px 40px;
+  }
+  .target {
+    position: absolute; width: 46px; height: 46px; border-radius: 6px;
+    background: var(--accent); border: 3px solid var(--ink); cursor: pointer;
+    box-shadow: 3px 3px 0 #000;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .start-overlay {
+    position: absolute; inset: 0; background: rgba(15,10,30,0.85);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 5;
+  }
+  .start-overlay h1 { font-family: 'Press Start 2P', monospace; font-size: 16px; color: var(--gold); margin: 0; }
+  .start-overlay p { color: var(--ink-dim); font-size: 17px; margin: 0; text-align: center; padding: 0 20px; }
+  .start-btn {
+    padding: 12px 24px; background: var(--accent); color: #fff; border: 3px solid var(--ink);
+    font-family: 'Press Start 2P', monospace; font-size: 12px; cursor: pointer; box-shadow: 4px 4px 0 #000;
+  }
+</style>
+</head>
+<body>
+<div class="hud">
+  <span class="score" id="score">PUNKTE: 0</span>
+  <span class="timer" id="timer">ZEIT: 20</span>
+</div>
+<div class="arena" id="arena">
+  <div class="start-overlay" id="start-overlay">
+    <h1>BLITZ-TIPPER</h1>
+    <p>Tippe so viele Ziele wie möglich in 20 Sekunden</p>
+    <button class="start-btn" id="start-btn">START</button>
+  </div>
+</div>
+<script>
+(function(){
+  const arena = document.getElementById('arena');
+  const scoreEl = document.getElementById('score');
+  const timerEl = document.getElementById('timer');
+  const startOverlay = document.getElementById('start-overlay');
+  const startBtn = document.getElementById('start-btn');
+
+  let score = 0, timeLeft = 20, running = false, targetTimer = null, countdownTimer = null;
+  let currentTarget = null;
+
+  function spawnTarget() {
+    if (currentTarget) currentTarget.remove();
+    const target = document.createElement('div');
+    target.className = 'target';
+    target.textContent = '★';
+    const w = arena.clientWidth, h = arena.clientHeight;
+    const x = Math.random() * (w - 60) + 6;
+    const y = Math.random() * (h - 60) + 6;
+    target.style.left = x + 'px';
+    target.style.top = y + 'px';
+    target.addEventListener('click', () => {
+      score++;
+      scoreEl.textContent = `PUNKTE: ${score}`;
+      spawnTarget();
+    });
+    arena.appendChild(target);
+    currentTarget = target;
+  }
+
+  function startGame() {
+    score = 0; timeLeft = 20; running = true;
+    scoreEl.textContent = 'PUNKTE: 0';
+    timerEl.textContent = 'ZEIT: 20';
+    startOverlay.style.display = 'none';
+    spawnTarget();
+    countdownTimer = setInterval(() => {
+      timeLeft--;
+      timerEl.textContent = `ZEIT: ${timeLeft}`;
+      if (timeLeft <= 0) endGame();
+    }, 1000);
+  }
+
+  function endGame() {
+    running = false;
+    clearInterval(countdownTimer);
+    if (currentTarget) { currentTarget.remove(); currentTarget = null; }
+    startOverlay.innerHTML = `
+      <h1>ZEIT UM!</h1>
+      <p>Du hast ${score} Ziele getroffen</p>
+      <button class="start-btn" id="restart-btn">NOCHMAL</button>
+    `;
+    startOverlay.style.display = 'flex';
+    document.getElementById('restart-btn').addEventListener('click', startGame);
+  }
+
+  startBtn.addEventListener('click', startGame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merk-Paare — Retro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0a1e; --panel: #1a1440; --panel-light: #2c2260;
+    --ink: #f2eee0; --ink-dim: #a79fd6; --accent: #ff4d6d; --gold: #ffd23f; --teal: #2ec4a6;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; min-height: 100vh;
+    background: var(--bg); color: var(--ink); font-family: 'VT323', monospace;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wrap { max-width: 420px; width: 100%; margin: 20px; text-align: center; }
+  h1 { font-family: 'Press Start 2P', monospace; font-size: 14px; color: var(--gold); margin: 0 0 6px; }
+  .status { font-size: 17px; color: var(--ink-dim); margin-bottom: 16px; }
+  .board {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  }
+  .card {
+    aspect-ratio: 1; background: var(--panel-light); border: 3px solid var(--ink);
+    box-shadow: 3px 3px 0 #000; display: flex; align-items: center; justify-content: center;
+    font-size: 26px; cursor: pointer; user-select: none;
+  }
+  .card.flipped, .card.matched { background: var(--panel); }
+  .card.matched { border-color: var(--teal); opacity: 0.55; cursor: default; }
+  .card .back { display: block; }
+  .card.flipped .back, .card.matched .back { display: none; }
+  .card .face { display: none; }
+  .card.flipped .face, .card.matched .face { display: block; }
+  .win-msg {
+    margin-top: 18px; font-family: 'Press Start 2P', monospace; font-size: 12px; color: var(--teal); min-height: 20px;
+  }
+  .restart-btn {
+    margin-top: 14px; padding: 10px 20px; background: var(--accent); color: #fff; border: 3px solid var(--ink);
+    font-family: 'Press Start 2P', monospace; font-size: 11px; cursor: pointer; box-shadow: 3px 3px 0 #000; display: none;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>MERK-PAARE</h1>
+  <p class="status" id="status">Züge: 0</p>
+  <div class="board" id="board"></div>
+  <p class="win-msg" id="win-msg"></p>
+  <button class="restart-btn" id="restart-btn">NOCHMAL SPIELEN</button>
+</div>
+<script>
+(function(){
+  const icons = ['🌍','💧','☀️','🌱','♻️','🔋','🚲','🌬️'];
+  let deck = [], flipped = [], matchedCount = 0, moves = 0, lock = false;
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  const board = document.getElementById('board');
+  const statusEl = document.getElementById('status');
+  const winMsg = document.getElementById('win-msg');
+  const restartBtn = document.getElementById('restart-btn');
+
+  function init() {
+    deck = shuffle([...icons, ...icons]);
+    flipped = []; matchedCount = 0; moves = 0; lock = false;
+    winMsg.textContent = ''; restartBtn.style.display = 'none';
+    statusEl.textContent = 'Züge: 0';
+    board.innerHTML = '';
+    deck.forEach((icon, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.icon = icon;
+      card.dataset.index = i;
+      card.innerHTML = `<span class="back">?</span><span class="face">${icon}</span>`;
+      card.addEventListener('click', () => flip(card));
+      board.appendChild(card);
+    });
+  }
+
+  function flip(card) {
+    if (lock || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+    card.classList.add('flipped');
+    flipped.push(card);
+    if (flipped.length === 2) {
+      moves++;
+      statusEl.textContent = `Züge: ${moves}`;
+      lock = true;
+      const [a, b] = flipped;
+      if (a.dataset.icon === b.dataset.icon) {
+        a.classList.add('matched'); b.classList.add('matched');
+        matchedCount++;
+        flipped = []; lock = false;
+        if (matchedCount === icons.length) {
+          winMsg.textContent = `GESCHAFFT IN ${moves} ZÜGEN!`;
+          restartBtn.style.display = 'inline-block';
+        }
+      } else {
+        setTimeout(() => {
+          a.classList.remove('flipped'); b.classList.remove('flipped');
+          flipped = []; lock = false;
+        }, 700);
+      }
+    }
+  }
+
+  restartBtn.addEventListener('click', init);
+  init();
+})();
+</script>
+</body>
+</html>

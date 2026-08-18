@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Segel-Vorschau</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  html, body {
+    margin: 0; padding: 0; overflow: hidden; background: #04101c;
+    font-family: 'VT323', monospace; color: #e7f4ff;
+  }
+  #scene { position: fixed; inset: 0; }
+  .hud {
+    position: fixed; top: 14px; left: 14px; z-index: 5;
+    font-family: 'Press Start 2P', monospace; font-size: 11px; color: #ffd23f;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
+  }
+  .hint {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    font-size: 17px; color: #9fd6ff; z-index: 5; text-align: center;
+  }
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div class="hud">SEGEL-VORSCHAU</div>
+<p class="hint">Ziehen, um die Ansicht zu drehen</p>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+const container = document.getElementById('scene');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a2540);
+scene.fog = new THREE.Fog(0x0a2540, 10, 40);
+
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 4, 10);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+// Lighting
+const hemi = new THREE.HemisphereLight(0xbfe3ff, 0x0a2540, 1.1);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffe9b0, 1.2);
+sun.position.set(6, 8, 3);
+scene.add(sun);
+
+// Ocean plane with animated vertices
+const oceanGeo = new THREE.PlaneGeometry(60, 60, 60, 60);
+oceanGeo.rotateX(-Math.PI / 2);
+const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1f6fa8, roughness: 0.35, metalness: 0.1, flatShading: true });
+const ocean = new THREE.Mesh(oceanGeo, oceanMat);
+scene.add(ocean);
+const oceanPos = oceanGeo.attributes.position;
+const basePositions = Float32Array.from(oceanPos.array);
+
+// Simple low-poly boat: hull + mast + sail
+const boat = new THREE.Group();
+
+const hullGeo = new THREE.CylinderGeometry(0.05, 0.6, 2.6, 8, 1, false);
+hullGeo.rotateZ(Math.PI / 2);
+const hullMat = new THREE.MeshStandardMaterial({ color: 0x8a5a34, roughness: 0.7 });
+const hull = new THREE.Mesh(hullGeo, hullMat);
+hull.position.y = 0.25;
+boat.add(hull);
+
+const deckGeo = new THREE.BoxGeometry(2.2, 0.15, 0.9);
+const deckMat = new THREE.MeshStandardMaterial({ color: 0xd8c39a, roughness: 0.8 });
+const deck = new THREE.Mesh(deckGeo, deckMat);
+deck.position.y = 0.5;
+boat.add(deck);
+
+const mastGeo = new THREE.CylinderGeometry(0.04, 0.04, 2.4, 8);
+const mastMat = new THREE.MeshStandardMaterial({ color: 0x3a2410 });
+const mast = new THREE.Mesh(mastGeo, mastMat);
+mast.position.set(0, 1.7, 0);
+boat.add(mast);
+
+const sailGeo = new THREE.PlaneGeometry(1.2, 1.7);
+const sailMat = new THREE.MeshStandardMaterial({ color: 0xf6f1e4, side: THREE.DoubleSide, roughness: 0.9 });
+const sail = new THREE.Mesh(sailGeo, sailMat);
+sail.position.set(0.02, 1.7, 0);
+sail.rotation.y = Math.PI / 2.3;
+boat.add(sail);
+
+scene.add(boat);
+
+// Orbit-ish manual controls (drag to rotate camera around origin)
+let isDragging = false;
+let prevX = 0, prevY = 0;
+let theta = 0.4, phi = 1.15;
+const radius = 10;
+
+function updateCamera() {
+  camera.position.x = radius * Math.sin(phi) * Math.sin(theta);
+  camera.position.y = radius * Math.cos(phi) + 2;
+  camera.position.z = radius * Math.sin(phi) * Math.cos(theta);
+  camera.lookAt(0, 0.5, 0);
+}
+updateCamera();
+
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  isDragging = true; prevX = e.clientX; prevY = e.clientY;
+});
+window.addEventListener('pointerup', () => { isDragging = false; });
+window.addEventListener('pointermove', (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - prevX;
+  const dy = e.clientY - prevY;
+  theta -= dx * 0.008;
+  phi = Math.min(Math.max(phi - dy * 0.006, 0.5), 1.5);
+  prevX = e.clientX; prevY = e.clientY;
+  updateCamera();
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+const clock = new THREE.Clock();
+let autoSpin = true;
+renderer.domElement.addEventListener('pointerdown', () => { autoSpin = false; });
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // animate ocean waves
+  for (let i = 0; i < oceanPos.count; i++) {
+    const x = basePositions[i * 3];
+    const z = basePositions[i * 3 + 2];
+    const y = Math.sin(x * 0.4 + t) * 0.18 + Math.cos(z * 0.35 + t * 0.8) * 0.14;
+    oceanPos.setY(i, y);
+  }
+  oceanPos.needsUpdate = true;
+  oceanGeo.computeVertexNormals();
+
+  // bob the boat with the nearest wave approximation
+  boat.position.y = Math.sin(t) * 0.18 + Math.cos(t * 0.8) * 0.1;
+  boat.rotation.z = Math.sin(t * 0.7) * 0.05;
+  boat.rotation.x = Math.cos(t * 0.6) * 0.04;
+
+  if (autoSpin) {
+    theta += 0.0022;
+    updateCamera();
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>

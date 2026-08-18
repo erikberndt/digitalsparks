@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applet-Katalog — Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000000; --panel: #121212; --border: #2a2a2a;
+    --ink: #f2f2f2; --ink-dim: #9a9a9a;
+    --accent: #ff5c39; --accent-dark: #d1451f;
+    --teal: #35d69a; --gold: #ffd23f;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--ink);
+    font-family: 'Roboto Mono', monospace;
+    min-height: 100vh;
+  }
+  code, .mono { font-family: 'Roboto Mono', monospace; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 24px 60px; }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+  }
+  header h1 { font-size: 22px; margin: 0; }
+  header p { margin: 4px 0 0; color: var(--ink-dim); font-size: 14px; }
+  .add-btn {
+    background: #8b3ff2; color: #ffffff; border: none; padding: 20px 34px;
+    border-radius: var(--radius); font-size: 18px; font-weight: 700; cursor: pointer;
+    font-family: 'Roboto Mono', monospace;
+  }
+  .add-btn:hover { background: #a45bff; }
+
+  .applet-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 24px;
+  }
+  .applet-card {
+    background: var(--panel); border: 2px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; cursor: pointer; transition: border-color 0.15s, transform 0.15s;
+  }
+  .applet-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .preview-wrap {
+    position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    border-bottom: 2px solid var(--border);
+  }
+  .preview-wrap .icon-big {
+    font-size: 92px; filter: drop-shadow(0 6px 0 rgba(0,0,0,0.25));
+  }
+  .preview-wrap .deco {
+    position: absolute; inset: 0; opacity: 0.5; pointer-events: none;
+  }
+  .preview-wrap .deco span {
+    position: absolute; font-size: 30px; opacity: 0.35;
+  }
+  .card-body { padding: 14px 16px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .card-body .info h3 { margin: 0 0 3px; font-size: 15px; }
+  .card-body .info p { margin: 0; font-size: 12px; color: var(--ink-dim); }
+  .badge {
+    font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .badge.published { background: #10352a; color: var(--teal); }
+  .badge.draft { background: #3a2e0a; color: var(--gold); }
+  .badge.mp { background: #211c3a; color: #9d94ff; margin-left: 6px; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: none; align-items: center; justify-content: center; padding: 16px; z-index: 30;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--panel); border: 2px solid var(--border); border-radius: 14px; max-width: 460px; width: 100%;
+    max-height: 88vh; overflow-y: auto; padding: 26px 26px 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;
+  }
+  .modal-header h2 { margin: 0; font-size: 17px; }
+  .modal-close {
+    background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-dim);
+    line-height: 1; padding: 4px;
+  }
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; color: var(--ink-dim); }
+  .field input[type="text"] {
+    width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: inherit; background: #000; color: var(--ink);
+  }
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .toggle-row:last-of-type { border-bottom: none; }
+  .toggle-row .label-txt { font-size: 14px; font-weight: 500; }
+  .toggle-row .label-sub { font-size: 11.5px; color: var(--ink-dim); margin-top: 2px; }
+  .switch {
+    position: relative; width: 42px; height: 24px; flex-shrink: 0;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; inset: 0; background: var(--border); border-radius: 999px;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .slider::before {
+    content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px;
+    background: #fff; border-radius: 50%; transition: transform 0.2s;
+  }
+  .switch input:checked + .slider { background: var(--teal); }
+  .switch input:checked + .slider::before { transform: translateX(18px); }
+
+  .embed-box {
+    background: #000; color: var(--ink); border: 1px solid var(--border); border-radius: 8px; padding: 14px;
+    font-size: 12px; word-break: break-all; margin-bottom: 10px; line-height: 1.6;
+  }
+  .copy-btn {
+    width: 100%; padding: 11px; background: var(--accent); color: #fff; border: none;
+    border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+  .copy-btn:hover { background: var(--accent-dark); }
+  .copy-btn.copied { background: var(--teal); }
+  .test-link {
+    display: block; text-align: center; margin-top: 10px; font-size: 12.5px; color: var(--ink-dim);
+    text-decoration: underline;
+  }
+
+  /* Add learning experience modal */
+  .steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 4px; }
+  .step { display: flex; gap: 12px; }
+  .step .num {
+    width: 26px; height: 26px; border-radius: 50%; background: var(--border); color: var(--ink);
+    font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .step .txt { font-size: 13px; line-height: 1.5; }
+  .step .txt code {
+    background: #000; border: 1px solid var(--border); padding: 1px 6px; border-radius: 5px; font-size: 12px;
+  }
+  .modal-note {
+    margin-top: 18px; font-size: 12px; color: var(--ink-dim); background: #000; border: 1px solid var(--border);
+    padding: 10px 12px; border-radius: 8px; line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Digital Sparks Learning Experiences</h1>
+      <p>Alle Learning Experiences an einem Ort</p>
+    </div>
+    <button class="add-btn" id="add-btn">+ Add learning experience</button>
+  </header>
+
+  <div class="applet-list" id="applet-list"></div>
+</div>
+
+<!-- Detail modal -->
+<div class="modal-backdrop" id="detail-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="detail-title">Applet</h2>
+      <button class="modal-close" id="detail-close">&times;</button>
+    </div>
+
+    <div class="field">
+      <label for="applet-name">Name des Applets</label>
+      <input type="text" id="applet-name">
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="label-txt">Veröffentlicht</div>
+        <div class="label-sub">Applet ist über den Embed-Code live abrufbar</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggle-published">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="label-txt">Erlaubt Multiplayer</div>
+        <div class="label-sub">Aktuell deaktiviert in dieser Umgebung</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggle-mp" disabled>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="field" style="margin-top:20px;">
+      <label>HTML Embed-Code</label>
+      <div class="embed-box" id="embed-code"></div>
+      <button class="copy-btn" id="copy-btn">Embed-Code kopieren</button>
+      <a class="test-link" id="test-link" href="#" target="_blank">Applet in neuem Tab testen →</a>
+    </div>
+  </div>
+</div>
+
+<!-- Add learning experience modal -->
+<div class="modal-backdrop" id="add-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Neues Applet hinzufügen</h2>
+      <button class="modal-close" id="add-close">&times;</button>
+    </div>
+    <p style="font-size:14px; color:var(--ink-dim); margin-top:0;">Das Anlegen läuft über Claude Code, nicht über dieses Fenster. So gehst du vor:</p>
+    <div class="steps">
+      <div class="step"><span class="num">1</span><span class="txt">Öffne dein Projekt-Terminal mit Claude Code und schreib: <code>neues applet</code></span></div>
+      <div class="step"><span class="num">2</span><span class="txt">Claude fragt dich nach Typ (Game, Fragebogen, Übung …) und einer kurzen Beschreibung — einfach in eigenen Worten antworten.</span></div>
+      <div class="step"><span class="num">3</span><span class="txt">Claude baut das Applet und fragt zwischendurch immer wieder: "Soll ich es pushen?" — du bestätigst, wenn du zufrieden bist.</span></div>
+      <div class="step"><span class="num">4</span><span class="txt">Nach dem Push erscheint das Applet automatisch in dieser Liste, als Entwurf (nicht veröffentlicht).</span></div>
+      <div class="step"><span class="num">5</span><span class="txt">Hier im Katalog Namen prüfen, veröffentlichen und den Embed-Code für Framer kopieren.</span></div>
+    </div>
+    <div class="modal-note">Hinweis: Dieses Fenster ist eine Anleitung, kein Formular — das eigentliche Bauen passiert bei dir in Claude Code.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const applets = [
+    { id: 'sort', name: 'Wichtig-Sortier-Welt', icon: '🎮', color: '#e6f2ea', published: true, file: 'room-sort-prototype-retro.html', gradient: 'linear-gradient(135deg,#1f7038,#0f0a1e)', deco: ['🌿','🏠','🗨️'] },
+    { id: 'quiz', name: 'Klima-Quiz', icon: '❓', color: '#fdeee8', published: true, file: 'game-quiz-retro.html', gradient: 'linear-gradient(135deg,#8f3c14,#1a1440)', deco: ['🌍','✅','💡'] },
+    { id: 'categorize', name: 'Kategorien-Sortierer', icon: '🗂️', color: '#eceafb', published: false, file: 'game-categorize-retro.html', gradient: 'linear-gradient(135deg,#3e2f8f,#0f0a1e)', deco: ['🧯','💧','🚪'] },
+    { id: 'sailing3d', name: '3D Segel-Vorschau', icon: '⛵', color: '#e3eefb', published: false, file: 'game-3d-sailing.html', gradient: 'linear-gradient(135deg,#144a8f,#04101c)', deco: ['🌊','☁️','🧭'] },
+    { id: 'memory', name: 'Merk-Paare', icon: '🧠', color: '#fbe9ee', published: true, file: 'game-memory-retro.html', gradient: 'linear-gradient(135deg,#a5325a,#1a1440)', deco: ['♻️','🔋','🌱'] },
+    { id: 'reaction', name: 'Blitz-Tipper', icon: '⚡', color: '#fdf1e0', published: false, file: 'game-reaction-retro.html', gradient: 'linear-gradient(135deg,#b3791b,#0f0a1e)', deco: ['★','★','★'] },
+    { id: 'wordfill', name: 'Lücken-Füller', icon: '✏️', color: '#e9f6f0', published: true, file: 'game-wordfill-retro.html', gradient: 'linear-gradient(135deg,#1f8f70,#0f0a1e)', deco: ['📝','🔤','✅'] }
+  ];
+
+  const list = document.getElementById('applet-list');
+  list.className = 'applet-list';
+
+  function renderList() {
+    list.innerHTML = '';
+    applets.forEach((a) => {
+      const card = document.createElement('div');
+      card.className = 'applet-card';
+
+      const previewWrap = document.createElement('div');
+      previewWrap.className = 'preview-wrap';
+      previewWrap.style.background = a.gradient;
+
+      const decoWrap = document.createElement('div');
+      decoWrap.className = 'deco';
+      const decoPositions = [
+        { top: '12%', left: '10%' }, { top: '68%', left: '78%' }, { top: '20%', left: '80%' }
+      ];
+      a.deco.forEach((d, i) => {
+        const span = document.createElement('span');
+        span.textContent = d;
+        span.style.top = decoPositions[i % decoPositions.length].top;
+        span.style.left = decoPositions[i % decoPositions.length].left;
+        decoWrap.appendChild(span);
+      });
+      previewWrap.appendChild(decoWrap);
+
+      const bigIcon = document.createElement('span');
+      bigIcon.className = 'icon-big';
+      bigIcon.textContent = a.icon;
+      previewWrap.appendChild(bigIcon);
+
+      const body = document.createElement('div');
+      body.className = 'card-body';
+      body.innerHTML = `
+        <div class="info">
+          <h3>${a.name}</h3>
+          <p>${a.file}</p>
+        </div>
+        <span class="badge ${a.published ? 'published' : 'draft'}">${a.published ? 'Veröffentlicht' : 'Entwurf'}</span>
+      `;
+
+      card.appendChild(previewWrap);
+      card.appendChild(body);
+      card.addEventListener('click', () => openDetail(a));
+      list.appendChild(card);
+    });
+  }
+  renderList();
+
+  const detailBackdrop = document.getElementById('detail-backdrop');
+  const detailTitle = document.getElementById('detail-title');
+  const nameInput = document.getElementById('applet-name');
+  const togglePublished = document.getElementById('toggle-published');
+  const embedCode = document.getElementById('embed-code');
+  const copyBtn = document.getElementById('copy-btn');
+  const testLink = document.getElementById('test-link');
+  let activeApplet = null;
+
+  function buildEmbed(a) {
+    return `&lt;iframe src="https://euer-projekt.vercel.app/${a.file}" width="100%" height="600" style="border:0;border-radius:12px;" allow="fullscreen"&gt;&lt;/iframe&gt;`;
+  }
+
+  function openDetail(a) {
+    activeApplet = a;
+    detailTitle.textContent = a.name;
+    nameInput.value = a.name;
+    togglePublished.checked = a.published;
+    embedCode.innerHTML = buildEmbed(a);
+    testLink.href = a.file;
+    copyBtn.textContent = 'Embed-Code kopieren';
+    copyBtn.classList.remove('copied');
+    detailBackdrop.classList.add('open');
+  }
+
+  document.getElementById('detail-close').addEventListener('click', () => {
+    detailBackdrop.classList.remove('open');
+  });
+  detailBackdrop.addEventListener('click', (e) => {
+    if (e.target === detailBackdrop) detailBackdrop.classList.remove('open');
+  });
+
+  togglePublished.addEventListener('change', () => {
+    if (activeApplet) {
+      activeApplet.published = togglePublished.checked;
+      renderList();
+    }
+  });
+  nameInput.addEventListener('input', () => {
+    if (activeApplet) {
+      activeApplet.name = nameInput.value;
+      detailTitle.textContent = nameInput.value;
+      renderList();
+    }
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    const plainText = `<iframe src="https://euer-projekt.vercel.app/${activeApplet.file}" width="100%" height="600" style="border:0;border-radius:12px;" allow="fullscreen"></iframe>`;
+    try {
+      await navigator.clipboard.writeText(plainText);
+      copyBtn.textContent = 'Kopiert!';
+      copyBtn.classList.add('copied');
+      setTimeout(() => { copyBtn.textContent = 'Embed-Code kopieren'; copyBtn.classList.remove('copied'); }, 1600);
+    } catch (e) {
+      copyBtn.textContent = 'Kopieren fehlgeschlagen';
+    }
+  });
+
+  // Add learning experience modal
+  const addBackdrop = document.getElementById('add-backdrop');
+  document.getElementById('add-btn').addEventListener('click', () => addBackdrop.classList.add('open'));
+  document.getElementById('add-close').addEventListener('click', () => addBackdrop.classList.remove('open'));
+  addBackdrop.addEventListener('click', (e) => {
+    if (e.target === addBackdrop) addBackdrop.classList.remove('open');
+  });
+})();
+</script>
+</body>
+</html>
