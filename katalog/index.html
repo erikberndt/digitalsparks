@@ -371,7 +371,7 @@
   let activeApplet = null;
 
   function buildEmbed(a) {
-    return `&lt;iframe src="https://euer-projekt.vercel.app/applets/${a.file}" width="100%" height="600" style="border:0;border-radius:12px;" allow="fullscreen"&gt;&lt;/iframe&gt;`;
+    return `&lt;iframe src="https://digital-sparks.vercel.app/applets/${a.file}" width="100%" height="600" style="border:0;border-radius:12px;" allow="fullscreen"&gt;&lt;/iframe&gt;`;
   }
 
   function openDetail(a) {
@@ -416,7 +416,7 @@
   });
 
   copyBtn.addEventListener('click', async () => {
-    const plainText = `<iframe src="https://euer-projekt.vercel.app/applets/${activeApplet.file}" width="100%" height="600" style="border:0;border-radius:12px;" allow="fullscreen"></iframe>`;
+    const plainText = `<iframe src="https://digital-sparks.vercel.app/applets/${activeApplet.file}" width="100%" height="600" style="border:0;border-radius:12px;" allow="fullscreen"></iframe>`;
     try {
       await navigator.clipboard.writeText(plainText);
       copyBtn.textContent = 'Kopiert!';
