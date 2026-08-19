@@ -8,218 +8,340 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #000000; --panel: #171a1a; --panel-light: #23282a;
-    --ink: #f9f9f9; --ink-dim: #a9a9a9;
-    --accent: #6a00e0; --accent-light: #a951ed; --gold: #ff33a7; --teal: #00ff74;
+    --bg: #05030a;
+    --ink: #f9f9f9; --ink-dim: #8b8b96;
+    --violet: #6a00e0; --violet-light: #a951ed;
+    --pink: #ff33a7; --green: #00ff74;
   }
   * { box-sizing: border-box; }
-  @keyframes bgPulse {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+
+  @keyframes drift {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(-4%, 3%) scale(1.12); }
   }
-  @keyframes titleGlow {
-    0%, 100% { text-shadow: 0 0 6px var(--gold), 0 0 16px rgba(255,51,167,0.6); }
-    50% { text-shadow: 0 0 10px var(--gold), 0 0 26px rgba(255,51,167,0.9); }
+  @keyframes titleShine {
+    0%, 100% { filter: drop-shadow(0 0 14px rgba(255,51,167,0.45)); }
+    50%      { filter: drop-shadow(0 0 26px rgba(255,51,167,0.85)); }
   }
-  @keyframes correctPulse {
-    0% { box-shadow: 0 0 0 0 rgba(0,255,116,0.8); }
-    100% { box-shadow: 0 0 16px 4px rgba(0,255,116,0); }
+  @keyframes riseIn { 0% { opacity: 0; transform: translateY(14px); } 100% { opacity: 1; transform: translateY(0); } }
+  @keyframes goodPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(0,255,116,0.7); }
+    100% { box-shadow: 0 0 0 14px rgba(0,255,116,0); }
   }
   @keyframes shakeX {
-    10%, 90% { transform: translateX(-2px); }
-    20%, 80% { transform: translateX(3px); }
-    30%, 50%, 70% { transform: translateX(-6px); }
-    40%, 60% { transform: translateX(6px); }
+    10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(3px); }
+    30%, 50%, 70% { transform: translateX(-6px); } 40%, 60% { transform: translateX(6px); }
   }
   @keyframes confettiFall {
-    0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(400px) rotate(540deg); opacity: 0; }
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
   }
+
   html, body {
-    margin: 0; padding: 0; min-height: 100vh;
+    margin: 0; padding: 0; min-height: 100%;
+    background: var(--bg); color: var(--ink);
+    font-family: 'Roboto Mono', monospace; overflow-x: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; inset: -20%; z-index: 0; pointer-events: none;
     background:
-      radial-gradient(circle at 15% 10%, rgba(0,255,116,0.16), transparent 45%),
-      radial-gradient(circle at 85% 90%, rgba(255,51,167,0.2), transparent 45%),
-      linear-gradient(120deg, #000000, #0d0518, #000000);
-    background-size: 200% 200%;
-    animation: bgPulse 14s ease infinite;
-    color: var(--ink);
-    font-family: 'Roboto Mono', monospace;
+      radial-gradient(ellipse 55% 45% at 16% 12%, rgba(0,255,116,0.2), transparent 62%),
+      radial-gradient(ellipse 55% 45% at 86% 20%, rgba(106,0,224,0.5), transparent 62%),
+      radial-gradient(ellipse 50% 40% at 50% 92%, rgba(255,51,167,0.36), transparent 62%);
+    animation: drift 21s ease-in-out infinite alternate;
   }
-  .wrap { position: relative; max-width: 560px; margin: 0 auto; padding: 64px 18px 40px; }
-  h1 { font-size: 24px; color: var(--gold); text-align: center; font-family: 'Roboto Mono', monospace; font-weight: 700; margin-bottom: 6px; letter-spacing: 1px; animation: titleGlow 3s ease-in-out infinite; }
-  .sub { text-align: center; color: var(--ink-dim); font-size: 16px; margin-bottom: 20px; }
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(169,81,237,0.10) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(169,81,237,0.10) 1px, transparent 1px),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.28) 0 1px, transparent 1px 3px);
+    background-size: 46px 46px, 46px 46px, 100% 3px;
+    -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 82%);
+    mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 82%);
+  }
+
+  .stage {
+    position: relative; z-index: 2; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center; padding: 54px 20px 22px;
+  }
+  .shell { width: 100%; max-width: 620px; }
+
+  .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+  .eyebrow { font-size: 9.5px; letter-spacing: 0.34em; color: var(--violet-light); margin: 0 0 7px; text-transform: uppercase; }
+  h1 {
+    margin: 0; font-size: clamp(20px, 4.6vw, 28px); font-weight: 700; letter-spacing: 0.05em; line-height: 1;
+    background: linear-gradient(170deg, #ffffff 8%, var(--pink) 62%, var(--violet-light) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: titleShine 3.4s ease-in-out infinite;
+  }
+  .stat {
+    min-width: 74px; padding: 8px 11px; border-radius: 11px; text-align: center; flex-shrink: 0;
+    background: linear-gradient(160deg, rgba(169,81,237,0.22), rgba(10,8,18,0.86));
+    border: 1px solid rgba(169,81,237,0.34); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .stat .k { display: block; font-size: 8.5px; letter-spacing: 0.2em; color: var(--ink-dim); margin-bottom: 4px; }
+  .stat .v { display: block; font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
   .pool {
-    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-    background: var(--panel); border: 3px solid var(--panel-light); padding: 14px; margin-bottom: 18px;
-    min-height: 56px; transition: border-color 0.15s, box-shadow 0.15s;
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-content: center;
+    min-height: 92px; padding: 13px; border-radius: 15px; margin-bottom: 13px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(9,7,16,0.9));
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 30px rgba(0,0,0,0.45);
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
   }
-  .pool.dragover { border-color: var(--accent-light); box-shadow: 0 0 14px 2px rgba(169,81,237,0.5); }
+  .pool.over { border-color: rgba(169,81,237,0.9); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 0 24px rgba(169,81,237,0.5); }
+  .pool:empty::after {
+    content: 'ALLE KARTEN VERTEILT'; font-size: 10px; letter-spacing: 0.22em; color: var(--ink-dim);
+  }
+
   .chip {
-    background: var(--panel-light); border: 2px solid var(--ink); color: var(--ink);
-    padding: 8px 12px; font-size: 15px; cursor: grab; box-shadow: 2px 2px 0 #000;
-    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    padding: 9px 13px; border-radius: 10px; font-size: 13.5px; cursor: grab; user-select: none;
+    background: linear-gradient(150deg, rgba(255,255,255,0.14), rgba(16,12,26,0.92));
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 6px 16px rgba(0,0,0,0.45);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease, opacity 0.14s ease;
+    animation: riseIn 0.35s backwards ease;
   }
-  .chip:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 #000, 0 0 8px 1px rgba(169,81,237,0.5); border-color: var(--accent-light); }
+  .chip:hover {
+    transform: translateY(-3px); border-color: rgba(169,81,237,0.85);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 12px 26px rgba(106,0,224,0.45), 0 0 18px rgba(169,81,237,0.4);
+  }
+  .chip:active { cursor: grabbing; }
   .chip.dragging { opacity: 0.35; transform: scale(0.94) rotate(-2deg); }
-  .bins { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .chip.correct { border-color: var(--green); background: linear-gradient(150deg, rgba(0,255,116,0.28), rgba(6,26,16,0.92)); animation: goodPulse 0.65s ease; }
+  .chip.wrong { border-color: var(--pink); background: linear-gradient(150deg, rgba(255,51,167,0.26), rgba(28,4,18,0.92)); animation: shakeX 0.42s ease; }
+
+  .bins { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .bin {
-    border: 3px dashed var(--panel-light); min-height: 140px; padding: 10px;
-    display: flex; flex-direction: column; gap: 8px; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    min-height: 132px; padding: 12px; border-radius: 15px;
+    display: flex; flex-direction: column; gap: 8px;
+    border: 1px dashed rgba(255,255,255,0.2);
+    background: linear-gradient(165deg, rgba(255,255,255,0.04), rgba(8,6,14,0.86));
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease, transform 0.16s ease;
   }
-  .bin h3 {
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 12px; text-align: center; margin: 0 0 8px;
+  .bin-head { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .bin-head .ico {
+    width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 13px;
+    border: 1px solid rgba(255,255,255,0.22);
   }
-  .bin.wichtig h3 { color: var(--teal); }
-  .bin.unwichtig h3 { color: var(--gold); }
-  .bin.wichtig.dragover { border-style: solid; border-color: var(--teal); box-shadow: 0 0 16px 2px rgba(0,255,116,0.45); background: rgba(0,255,116,0.06); }
-  .bin.unwichtig.dragover { border-style: solid; border-color: var(--gold); box-shadow: 0 0 16px 2px rgba(255,51,167,0.45); background: rgba(255,51,167,0.06); }
-  .check-btn {
-    margin-top: 20px; width: 100%; padding: 12px;
-    background: var(--accent); color: #fff; border: 3px solid var(--ink);
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 13px; cursor: pointer;
-    box-shadow: 4px 4px 0 #000, 0 0 14px 1px rgba(106,0,224,0.7);
+  .bin-head .lbl { font-size: 10.5px; font-weight: 700; letter-spacing: 0.16em; flex: 1; }
+  .bin-head .cnt {
+    font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px;
+    background: rgba(255,255,255,0.1); color: var(--ink-dim); font-variant-numeric: tabular-nums;
   }
-  .check-btn:hover { background: var(--accent-light); }
-  .check-btn:active { transform: translate(4px,4px); box-shadow: 0 0 0 #000; }
-  .result-msg { text-align: center; margin-top: 14px; font-size: 17px; color: var(--gold); min-height: 22px; text-shadow: 0 0 10px rgba(255,51,167,0.6); }
-  .chip.correct { outline: 2px solid var(--teal); animation: correctPulse 0.6s ease; }
-  .chip.wrong { outline: 2px solid var(--gold); animation: shakeX 0.4s ease; }
-  .confetti-piece { position: absolute; top: 0; width: 8px; height: 8px; pointer-events: none; animation: confettiFall 1.5s ease-in forwards; z-index: 5; }
+  .bin .drop { display: flex; flex-wrap: wrap; gap: 7px; align-content: flex-start; flex: 1; }
+
+  .bin.yes .ico { background: linear-gradient(150deg, rgba(0,255,116,0.4), rgba(0,110,52,0.7)); }
+  .bin.yes .lbl { color: var(--green); }
+  .bin.yes.over {
+    border-style: solid; border-color: var(--green); transform: translateY(-3px);
+    background: linear-gradient(165deg, rgba(0,255,116,0.12), rgba(8,6,14,0.86));
+    box-shadow: 0 0 26px rgba(0,255,116,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .bin.no .ico { background: linear-gradient(150deg, rgba(255,51,167,0.4), rgba(150,0,85,0.7)); }
+  .bin.no .lbl { color: var(--pink); }
+  .bin.no.over {
+    border-style: solid; border-color: var(--pink); transform: translateY(-3px);
+    background: linear-gradient(165deg, rgba(255,51,167,0.12), rgba(8,6,14,0.86));
+    box-shadow: 0 0 26px rgba(255,51,167,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+
+  .btn {
+    width: 100%; margin-top: 14px; padding: 14px; border-radius: 12px; cursor: pointer;
+    font-family: inherit; font-weight: 700; font-size: 12px; letter-spacing: 0.16em; color: #fff;
+    background: linear-gradient(150deg, var(--violet-light), var(--violet) 60%, #45009c);
+    border: 1px solid rgba(255,255,255,0.26);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.32), 0 12px 30px rgba(106,0,224,0.5);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease, opacity 0.14s ease;
+  }
+  .btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 16px 38px rgba(106,0,224,0.68); }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+
+  .msg { text-align: center; margin: 11px 0 0; min-height: 18px; font-size: 12.5px; letter-spacing: 0.06em; color: var(--ink-dim); }
+  .msg.good { color: var(--green); }
+  .msg.bad { color: var(--pink); }
+  .hint { text-align: center; margin: 9px 0 0; font-size: 10px; letter-spacing: 0.18em; color: rgba(139,139,150,0.75); }
+
+  .confetti { position: fixed; top: -20px; width: 9px; height: 9px; z-index: 40; pointer-events: none; animation: confettiFall 2s ease-in forwards; }
+
+  @media (max-width: 460px) { .bins { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
-<div class="wrap" id="wrap">
-  <h1>KATEGORIEN-SORTIERER</h1>
-  <p class="sub">Ziehe die Karten in die passende Kategorie</p>
-
-  <div class="pool" id="pool"></div>
-
-  <div class="bins">
-    <div class="bin wichtig" data-bin="wichtig" id="bin-wichtig">
-      <h3>WICHTIG</h3>
+<div class="stage">
+  <div class="shell">
+    <div class="head">
+      <div>
+        <p class="eyebrow">Ziehen oder antippen</p>
+        <h1>KATEGORIEN-SORTIERER</h1>
+      </div>
+      <div class="stat"><span class="k">OFFEN</span><span class="v" id="v-left">6</span></div>
     </div>
-    <div class="bin unwichtig" data-bin="unwichtig" id="bin-unwichtig">
-      <h3>NICHT WICHTIG</h3>
+
+    <div class="pool" id="pool"></div>
+
+    <div class="bins">
+      <div class="bin yes" data-bin="wichtig">
+        <div class="bin-head">
+          <span class="ico">✓</span><span class="lbl">WICHTIG</span><span class="cnt" id="c-yes">0</span>
+        </div>
+        <div class="drop"></div>
+      </div>
+      <div class="bin no" data-bin="unwichtig">
+        <div class="bin-head">
+          <span class="ico">✕</span><span class="lbl">NICHT WICHTIG</span><span class="cnt" id="c-no">0</span>
+        </div>
+        <div class="drop"></div>
+      </div>
     </div>
+
+    <button class="btn" id="check" disabled>PRÜFEN</button>
+    <p class="msg" id="msg"></p>
+    <p class="hint">TIPP: KARTE ANTIPPEN SCHIEBT SIE ZUR NÄCHSTEN KATEGORIE</p>
   </div>
-
-  <button class="check-btn" id="check-btn">PRÜFEN</button>
-  <p class="result-msg" id="result-msg"></p>
 </div>
+
 <script>
 (function(){
+  "use strict";
   const items = [
-    { text: 'Rauchmelder testen', bin: 'wichtig' },
-    { text: 'Lieblingsfarbe wählen', bin: 'unwichtig' },
-    { text: 'Wasserflasche mitnehmen', bin: 'wichtig' },
-    { text: 'Sticker sammeln', bin: 'unwichtig' },
-    { text: 'Fluchtweg kennen', bin: 'wichtig' },
-    { text: 'Neue Emojis aussuchen', bin: 'unwichtig' }
+    { text: 'Rauchmelder testen',     bin: 'wichtig' },
+    { text: 'Lieblingsfarbe wählen',  bin: 'unwichtig' },
+    { text: 'Wasserflasche mitnehmen',bin: 'wichtig' },
+    { text: 'Sticker sammeln',        bin: 'unwichtig' },
+    { text: 'Fluchtweg kennen',       bin: 'wichtig' },
+    { text: 'Neue Emojis aussuchen',  bin: 'unwichtig' }
   ];
 
-  const wrap = document.getElementById('wrap');
-  const pool = document.getElementById('pool');
-  const bins = document.querySelectorAll('.bin');
+  const pool  = document.getElementById('pool');
+  const bins  = [...document.querySelectorAll('.bin')];
+  const drops = bins.map(b => b.querySelector('.drop'));
+  const zones = [pool, ...drops];
+  const check = document.getElementById('check');
+  const msg   = document.getElementById('msg');
+  const vLeft = document.getElementById('v-left');
+  const cYes  = document.getElementById('c-yes');
+  const cNo   = document.getElementById('c-no');
 
   let actx = null;
-  function beep(freq, dur, type) {
+  function tone(freq, dur, type, vol) {
     try {
       actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-      const osc = actx.createOscillator();
-      const gain = actx.createGain();
-      osc.type = type || 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.15, actx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
-      osc.connect(gain); gain.connect(actx.destination);
-      osc.start(); osc.stop(actx.currentTime + dur);
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol == null ? 0.13 : vol, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(); o.stop(actx.currentTime + dur);
     } catch (e) {}
   }
-  function sfxDrop() { beep(500, 0.06, 'square'); }
-  function sfxWin() { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'square'), i * 100)); }
-  function sfxPartial() { beep(660, 0.12, 'square'); }
-  function sfxMiss() { beep(160, 0.24, 'sawtooth'); }
+  const sDrop = () => tone(520, 0.06, 'square', 0.09);
+  const sWin  = () => [523,659,784,1046,1318].forEach((f,i) => setTimeout(() => tone(f, 0.2, 'square'), i*95));
+  const sPart = () => tone(660, 0.12, 'square');
+  const sBad  = () => tone(150, 0.24, 'sawtooth', 0.1);
 
-  const confettiColors = ['#ff33a7', '#a951ed', '#00ff74', '#6a00e0', '#f9f9f9'];
-  function burstConfetti(count) {
-    for (let i = 0; i < count; i++) {
-      const piece = document.createElement('div');
-      piece.className = 'confetti-piece';
-      piece.style.left = Math.random() * 100 + '%';
-      piece.style.background = confettiColors[i % confettiColors.length];
-      piece.style.animationDelay = (Math.random() * 0.2) + 's';
-      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-      wrap.appendChild(piece);
-      setTimeout(() => piece.remove(), 1800);
+  const cc = ['#ff33a7','#a951ed','#00ff74','#6a00e0','#ffffff'];
+  function confetti(n) {
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti';
+      p.style.left = Math.random()*100 + 'vw';
+      p.style.background = cc[i % cc.length];
+      p.style.animationDelay = (Math.random()*0.4) + 's';
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 2500);
     }
   }
 
-  function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
+  const shuffle = (a) => { a = [...a]; for (let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+
+  function refresh() {
+    const left = pool.querySelectorAll('.chip').length;
+    vLeft.textContent = left;
+    cYes.textContent = drops[0].querySelectorAll('.chip').length;
+    cNo.textContent  = drops[1].querySelectorAll('.chip').length;
+    check.disabled = left > 0;
   }
 
-  shuffle(items).forEach((item) => {
+  shuffle(items).forEach((item, i) => {
     const chip = document.createElement('div');
     chip.className = 'chip';
     chip.textContent = item.text;
     chip.draggable = true;
     chip.dataset.bin = item.bin;
+    chip.style.animationDelay = (i * 0.05) + 's';
+
     chip.addEventListener('dragstart', () => chip.classList.add('dragging'));
-    chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+    chip.addEventListener('dragend',   () => { chip.classList.remove('dragging'); refresh(); });
+
+    // Tap cycles pool -> wichtig -> unwichtig -> pool, so touch users never need to drag.
+    chip.addEventListener('click', () => {
+      const here = chip.parentElement;
+      const next = here === pool ? drops[0] : here === drops[0] ? drops[1] : pool;
+      next.appendChild(chip);
+      chip.classList.remove('correct','wrong');
+      sDrop(); refresh();
+    });
+
     pool.appendChild(chip);
   });
 
-  [pool, ...bins].forEach((zone) => {
-    zone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      zone.classList.add('dragover');
-    });
-    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zones.forEach((zone) => {
+    const visual = zone.closest('.bin') || zone;
+    zone.addEventListener('dragover', (e) => { e.preventDefault(); visual.classList.add('over'); });
+    zone.addEventListener('dragleave', () => visual.classList.remove('over'));
     zone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      zone.classList.remove('dragover');
-      const dragging = document.querySelector('.dragging');
-      if (dragging) { zone.appendChild(dragging); sfxDrop(); }
+      e.preventDefault(); visual.classList.remove('over');
+      const dragging = document.querySelector('.chip.dragging');
+      if (!dragging) return;
+      zone.appendChild(dragging);
+      dragging.classList.remove('correct','wrong');
+      sDrop(); refresh();
     });
   });
 
-  document.getElementById('check-btn').addEventListener('click', () => {
-    let correctCount = 0;
+  check.addEventListener('click', () => {
+    let right = 0;
     document.querySelectorAll('.chip').forEach((chip) => {
-      chip.classList.remove('correct', 'wrong');
+      chip.classList.remove('correct','wrong');
       void chip.offsetWidth;
-      const parentBin = chip.closest('.bin');
-      const placedBin = parentBin ? parentBin.dataset.bin : null;
-      if (placedBin === chip.dataset.bin) {
-        chip.classList.add('correct');
-        correctCount++;
-      } else {
-        chip.classList.add('wrong');
-      }
+      const bin = chip.closest('.bin');
+      const placed = bin ? bin.dataset.bin : null;
+      if (placed === chip.dataset.bin) { chip.classList.add('correct'); right++; }
+      else { chip.classList.add('wrong'); }
     });
-    document.getElementById('result-msg').textContent = `${correctCount} von ${items.length} richtig sortiert`;
-    if (correctCount === items.length) { sfxWin(); burstConfetti(26); }
-    else if (correctCount > 0) { sfxPartial(); }
-    else { sfxMiss(); }
+
+    const all = right === items.length;
+    msg.textContent = all
+      ? '★ Alles richtig sortiert!'
+      : right + ' von ' + items.length + ' richtig — verschiebe die pinken Karten.';
+    msg.className = all ? 'msg good' : 'msg bad';
+    if (all) { sWin(); confetti(34); } else if (right > 0) { sPart(); } else { sBad(); }
   });
+
+  refresh();
 })();
 </script>
+
 <button id="fs-toggle-btn" type="button" aria-label="Vollbild umschalten">⛶ MAXIMIEREN</button>
 <style>
   #fs-toggle-btn {
-    position: fixed; top: 10px; right: 10px; z-index: 9999;
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 11px; line-height: 1;
-    padding: 9px 11px; background: #171a1a; color: #a951ed;
-    border: 2px solid #a951ed; box-shadow: 3px 3px 0 #000; cursor: pointer;
-    white-space: nowrap;
+    position: fixed; top: 14px; right: 14px; z-index: 9999;
+    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 10px; letter-spacing: 0.12em; line-height: 1;
+    padding: 10px 13px; border-radius: 9px; cursor: pointer; white-space: nowrap;
+    color: #ecd9ff;
+    background: linear-gradient(150deg, rgba(106,0,224,0.9), rgba(60,0,130,0.92));
+    border: 1px solid rgba(169,81,237,0.75);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 8px 22px rgba(106,0,224,0.5);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
   }
-  #fs-toggle-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #000; }
+  #fs-toggle-btn:hover { transform: translateY(-2px); filter: brightness(1.18); box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 12px 28px rgba(106,0,224,0.68); }
+  #fs-toggle-btn:active { transform: translateY(1px); }
   #fs-toggle-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 </style>
 <script>

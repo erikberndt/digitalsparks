@@ -8,183 +8,263 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #000000; --panel: #171a1a; --panel-light: #23282a;
-    --ink: #f9f9f9; --ink-dim: #a9a9a9; --accent: #6a00e0; --accent-light: #a951ed; --gold: #ff33a7; --teal: #00ff74;
+    --bg: #05030a;
+    --ink: #f9f9f9; --ink-dim: #8b8b96;
+    --violet: #6a00e0; --violet-light: #a951ed;
+    --pink: #ff33a7; --green: #00ff74;
   }
   * { box-sizing: border-box; }
-  @keyframes bgPulse {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+
+  @keyframes drift {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(4%, 3%) scale(1.12); }
   }
-  @keyframes borderGlow {
-    0%, 100% { box-shadow: 0 0 0 4px var(--bg), 0 0 0 8px var(--teal), 0 0 22px 3px rgba(0,255,116,0.5), 8px 8px 0 8px rgba(0,0,0,0.5); }
-    50% { box-shadow: 0 0 0 4px var(--bg), 0 0 0 8px var(--accent-light), 0 0 30px 6px rgba(169,81,237,0.55), 8px 8px 0 8px rgba(0,0,0,0.5); }
+  @keyframes titleShine {
+    0%, 100% { filter: drop-shadow(0 0 14px rgba(255,51,167,0.45)); }
+    50%      { filter: drop-shadow(0 0 26px rgba(255,51,167,0.85)); }
   }
-  @keyframes titleGlow {
-    0%, 100% { text-shadow: 0 0 6px var(--gold), 0 0 16px rgba(255,51,167,0.6); }
-    50% { text-shadow: 0 0 10px var(--gold), 0 0 26px rgba(255,51,167,0.9); }
-  }
-  @keyframes correctPulse {
-    0% { box-shadow: 0 0 0 0 rgba(0,255,116,0.8); }
-    100% { box-shadow: 0 0 16px 4px rgba(0,255,116,0); }
+  @keyframes riseIn { 0% { opacity: 0; transform: translateY(14px); } 100% { opacity: 1; transform: translateY(0); } }
+  @keyframes goodPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(0,255,116,0.7); }
+    100% { box-shadow: 0 0 0 14px rgba(0,255,116,0); }
   }
   @keyframes shakeX {
-    10%, 90% { transform: translateX(-2px); }
-    20%, 80% { transform: translateX(3px); }
-    30%, 50%, 70% { transform: translateX(-6px); }
-    40%, 60% { transform: translateX(6px); }
+    10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(3px); }
+    30%, 50%, 70% { transform: translateX(-6px); } 40%, 60% { transform: translateX(6px); }
   }
   @keyframes confettiFall {
-    0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(360px) rotate(540deg); opacity: 0; }
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
   }
+
   html, body {
-    margin: 0; padding: 0; min-height: 100vh;
+    margin: 0; padding: 0; min-height: 100%;
+    background: var(--bg); color: var(--ink);
+    font-family: 'Roboto Mono', monospace; overflow-x: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; inset: -20%; z-index: 0; pointer-events: none;
     background:
-      radial-gradient(circle at 20% 20%, rgba(0,255,116,0.2), transparent 45%),
-      radial-gradient(circle at 80% 80%, rgba(106,0,224,0.3), transparent 45%),
-      linear-gradient(120deg, #000000, #0d0518, #000000);
-    background-size: 200% 200%;
-    animation: bgPulse 13s ease infinite;
-    color: var(--ink); font-family: 'Roboto Mono', monospace;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
+      radial-gradient(ellipse 55% 45% at 84% 16%, rgba(0,255,116,0.2), transparent 62%),
+      radial-gradient(ellipse 55% 45% at 16% 20%, rgba(106,0,224,0.5), transparent 62%),
+      radial-gradient(ellipse 50% 40% at 60% 90%, rgba(255,51,167,0.36), transparent 62%);
+    animation: drift 20s ease-in-out infinite alternate;
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(169,81,237,0.10) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(169,81,237,0.10) 1px, transparent 1px),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.28) 0 1px, transparent 1px 3px);
+    background-size: 46px 46px, 46px 46px, 100% 3px;
+    -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 82%);
+    mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 82%);
+  }
+
+  .stage {
+    position: relative; z-index: 2; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center; padding: 56px 20px 24px;
   }
   .card {
-    position: relative;
-    max-width: 480px; width: 100%; margin: 20px; background: var(--panel);
-    border: 4px solid var(--ink); animation: borderGlow 3.4s ease-in-out infinite;
-    padding: 26px 24px; overflow: hidden;
+    position: relative; width: 100%; max-width: 560px; padding: 26px 26px 24px; border-radius: 20px;
+    background: linear-gradient(165deg, rgba(169,81,237,0.16), rgba(9,7,16,0.93));
+    border: 1px solid rgba(169,81,237,0.4);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 26px 66px rgba(0,0,0,0.66), 0 0 46px rgba(106,0,224,0.22);
+    backdrop-filter: blur(10px); overflow: hidden;
   }
-  h1 { font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 22px; color: var(--gold); text-align: center; margin: 0 0 18px; letter-spacing: 1px; animation: titleGlow 3s ease-in-out infinite; }
-  .sentence { font-size: 19px; line-height: 2.3; margin-bottom: 22px; }
-  select {
-    font-family: 'Roboto Mono', monospace; font-size: 16px; background: var(--panel-light); color: var(--ink);
-    border: 2px solid var(--ink); padding: 3px 8px; margin: 0 2px; cursor: pointer;
-    transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
+
+  .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+  .eyebrow { font-size: 9.5px; letter-spacing: 0.34em; color: var(--violet-light); margin: 0 0 7px; text-transform: uppercase; }
+  h1 {
+    margin: 0; font-size: clamp(21px, 5vw, 28px); font-weight: 700; letter-spacing: 0.05em; line-height: 1;
+    background: linear-gradient(170deg, #ffffff 8%, var(--pink) 62%, var(--violet-light) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: titleShine 3.4s ease-in-out infinite;
   }
-  select:hover, select:focus { border-color: var(--accent-light); box-shadow: 0 0 10px 1px rgba(169,81,237,0.6); outline: none; }
-  select.correct { border-color: var(--teal); animation: correctPulse 0.6s ease; }
-  select.wrong { border-color: var(--gold); animation: shakeX 0.4s ease; }
-  .check-btn {
-    width: 100%; padding: 12px; background: var(--accent); color: #fff; border: 3px solid var(--ink);
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 13px; cursor: pointer;
-    box-shadow: 4px 4px 0 #000, 0 0 14px 1px rgba(106,0,224,0.7);
+  .stat {
+    min-width: 74px; padding: 8px 11px; border-radius: 11px; text-align: center; flex-shrink: 0;
+    background: linear-gradient(160deg, rgba(169,81,237,0.22), rgba(10,8,18,0.86));
+    border: 1px solid rgba(169,81,237,0.34); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
   }
-  .check-btn:hover { background: var(--accent-light); }
-  .check-btn:active { transform: translate(4px,4px); box-shadow: 0 0 0 #000; }
-  .result { text-align: center; margin-top: 14px; font-size: 17px; color: var(--gold); min-height: 22px; text-shadow: 0 0 10px rgba(255,51,167,0.6); }
-  .confetti-piece { position: absolute; top: 0; width: 8px; height: 8px; pointer-events: none; animation: confettiFall 1.4s ease-in forwards; z-index: 5; }
+  .stat .k { display: block; font-size: 8.5px; letter-spacing: 0.2em; color: var(--ink-dim); margin-bottom: 4px; }
+  .stat .v { display: block; font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .sentence {
+    font-size: clamp(15px, 3.4vw, 17.5px); line-height: 2.45; margin: 0 0 22px;
+    animation: riseIn 0.4s ease;
+  }
+  .blank {
+    display: inline-block; position: relative;
+    font-family: inherit; font-size: 14px; font-weight: 700; color: var(--ink);
+    padding: 7px 30px 7px 13px; border-radius: 10px; cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+    background:
+      linear-gradient(150deg, rgba(169,81,237,0.34), rgba(20,12,36,0.94));
+    border: 1px solid rgba(169,81,237,0.6);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 5px 14px rgba(0,0,0,0.45);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease, background 0.2s ease;
+  }
+  .blank:hover, .blank:focus {
+    outline: none; transform: translateY(-2px); border-color: var(--violet-light);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 10px 24px rgba(106,0,224,0.5), 0 0 18px rgba(169,81,237,0.5);
+  }
+  .blank option { background: #12091f; color: var(--ink); font-weight: 400; }
+  .blank-wrap { position: relative; display: inline-block; }
+  .blank-wrap::after {
+    content: '▾'; position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+    pointer-events: none; font-size: 10px; color: rgba(255,255,255,0.65);
+  }
+  .blank.correct {
+    border-color: var(--green); color: #eafff3;
+    background: linear-gradient(150deg, rgba(0,255,116,0.3), rgba(6,26,16,0.94));
+    animation: goodPulse 0.65s ease;
+  }
+  .blank.wrong {
+    border-color: var(--pink); color: #ffe6f5;
+    background: linear-gradient(150deg, rgba(255,51,167,0.28), rgba(28,4,18,0.94));
+    animation: shakeX 0.42s ease;
+  }
+
+  .btn {
+    width: 100%; padding: 14px; border-radius: 12px; cursor: pointer;
+    font-family: inherit; font-weight: 700; font-size: 12px; letter-spacing: 0.16em; color: #fff;
+    background: linear-gradient(150deg, var(--violet-light), var(--violet) 60%, #45009c);
+    border: 1px solid rgba(255,255,255,0.26);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.32), 0 12px 30px rgba(106,0,224,0.5);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+  }
+  .btn:hover { transform: translateY(-2px); filter: brightness(1.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 16px 38px rgba(106,0,224,0.68); }
+  .btn:active { transform: translateY(1px); }
+
+  .msg { text-align: center; margin: 13px 0 0; min-height: 20px; font-size: 12.5px; letter-spacing: 0.06em; color: var(--ink-dim); }
+  .msg.good { color: var(--green); }
+  .msg.bad { color: var(--pink); }
+
+  .confetti { position: fixed; top: -20px; width: 9px; height: 9px; z-index: 40; pointer-events: none; animation: confettiFall 2s ease-in forwards; }
 </style>
 </head>
 <body>
-<div class="card" id="card">
-  <h1>LÜCKEN-FÜLLER</h1>
-  <div class="sentence" id="sentence"></div>
-  <button class="check-btn" id="check-btn">PRÜFEN</button>
-  <p class="result" id="result"></p>
+<div class="stage">
+  <div class="card">
+    <div class="head">
+      <div>
+        <p class="eyebrow">Müll &amp; Kreislauf</p>
+        <h1>LÜCKEN-FÜLLER</h1>
+      </div>
+      <div class="stat"><span class="k">RICHTIG</span><span class="v" id="v-right">–</span></div>
+    </div>
+
+    <div class="sentence" id="sentence"></div>
+    <button class="btn" id="check">PRÜFEN</button>
+    <p class="msg" id="msg"></p>
+  </div>
 </div>
+
 <script>
 (function(){
+  "use strict";
   const blanks = [
-    { options: ['Plastik', 'Papier', 'Glas'], answer: 'Glas' },
-    { options: ['Kompost', 'Restmüll', 'Sondermüll'], answer: 'Kompost' },
-    { options: ['weniger', 'mehr', 'gleich viel'], answer: 'weniger' }
+    { options: ['Plastik', 'Papier', 'Glas'],           answer: 'Glas' },
+    { options: ['Kompost', 'Restmüll', 'Sondermüll'],   answer: 'Kompost' },
+    { options: ['weniger', 'mehr', 'gleich viel'],      answer: 'weniger' }
   ];
 
-  const card = document.getElementById('card');
   const sentenceEl = document.getElementById('sentence');
+  const msg = document.getElementById('msg');
+  const vRight = document.getElementById('v-right');
 
   let actx = null;
-  function beep(freq, dur, type) {
+  function tone(freq, dur, type, vol) {
     try {
       actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-      const osc = actx.createOscillator();
-      const gain = actx.createGain();
-      osc.type = type || 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.15, actx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
-      osc.connect(gain); gain.connect(actx.destination);
-      osc.start(); osc.stop(actx.currentTime + dur);
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol == null ? 0.13 : vol, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(); o.stop(actx.currentTime + dur);
     } catch (e) {}
   }
-  function sfxWin() { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'square'), i * 100)); }
-  function sfxPartial() { beep(660, 0.12, 'square'); }
-  function sfxMiss() { beep(160, 0.24, 'sawtooth'); }
+  const sPick = () => tone(520, 0.05, 'square', 0.08);
+  const sWin  = () => [523,659,784,1046,1318].forEach((f,i) => setTimeout(() => tone(f, 0.2, 'square'), i*95));
+  const sPart = () => tone(660, 0.12, 'square');
+  const sBad  = () => tone(150, 0.24, 'sawtooth', 0.1);
 
-  const confettiColors = ['#ff33a7', '#a951ed', '#00ff74', '#6a00e0', '#f9f9f9'];
-  function burstConfetti(count) {
-    for (let i = 0; i < count; i++) {
-      const piece = document.createElement('div');
-      piece.className = 'confetti-piece';
-      piece.style.left = Math.random() * 100 + '%';
-      piece.style.background = confettiColors[i % confettiColors.length];
-      piece.style.animationDelay = (Math.random() * 0.2) + 's';
-      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-      card.appendChild(piece);
-      setTimeout(() => piece.remove(), 1700);
+  const cc = ['#ff33a7','#a951ed','#00ff74','#6a00e0','#ffffff'];
+  function confetti(n) {
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti';
+      p.style.left = Math.random()*100 + 'vw';
+      p.style.background = cc[i % cc.length];
+      p.style.animationDelay = (Math.random()*0.4) + 's';
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 2500);
     }
   }
 
-  function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
+  const shuffle = (a) => { a = [...a]; for (let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
 
   function render() {
-    sentenceEl.innerHTML = 'Küchenabfälle gehören in den <span id="b0"></span>-Behälter, ' +
-      'während Altglas separat in den <span id="b1"></span>-Container gehört. ' +
-      'Wer Produkte wiederverwendet statt wegwirft, erzeugt <span id="b2"></span> Müll im Jahr.';
+    sentenceEl.innerHTML =
+      'Küchenabfälle gehören in den <span id="b0"></span>-Behälter, während Altglas separat in den ' +
+      '<span id="b1"></span>-Container gehört. Wer Produkte wiederverwendet statt wegwirft, erzeugt ' +
+      '<span id="b2"></span> Müll im Jahr.';
 
     blanks.forEach((b, i) => {
-      const select = document.createElement('select');
-      select.id = 'select-' + i;
+      const wrap = document.createElement('span');
+      wrap.className = 'blank-wrap';
+      const sel = document.createElement('select');
+      sel.className = 'blank';
+      sel.id = 'sel-' + i;
       shuffle(b.options).forEach((opt) => {
         const o = document.createElement('option');
         o.value = opt; o.textContent = opt;
-        select.appendChild(o);
+        sel.appendChild(o);
       });
-      select.addEventListener('change', () => select.classList.remove('correct', 'wrong'));
-      document.getElementById('b' + i).replaceWith(select);
+      sel.addEventListener('change', () => { sel.classList.remove('correct','wrong'); sPick(); });
+      wrap.appendChild(sel);
+      document.getElementById('b' + i).replaceWith(wrap);
     });
   }
   render();
 
-  document.getElementById('check-btn').addEventListener('click', () => {
-    let correct = 0;
+  document.getElementById('check').addEventListener('click', () => {
+    let right = 0;
     blanks.forEach((b, i) => {
-      const select = document.getElementById('select-' + i);
-      select.classList.remove('correct', 'wrong');
-      void select.offsetWidth;
-      if (select.value === b.answer) {
-        select.classList.add('correct');
-        correct++;
-      } else {
-        select.classList.add('wrong');
-      }
+      const sel = document.getElementById('sel-' + i);
+      sel.classList.remove('correct','wrong');
+      void sel.offsetWidth;
+      if (sel.value === b.answer) { sel.classList.add('correct'); right++; }
+      else { sel.classList.add('wrong'); }
     });
-    document.getElementById('result').textContent = `${correct} von ${blanks.length} richtig`;
-    if (correct === blanks.length) { sfxWin(); burstConfetti(24); }
-    else if (correct > 0) { sfxPartial(); }
-    else { sfxMiss(); }
+
+    vRight.textContent = right + '/' + blanks.length;
+    const all = right === blanks.length;
+    msg.textContent = all
+      ? '★ Alle Lücken korrekt gefüllt!'
+      : right + ' von ' + blanks.length + ' richtig — probier die pinken nochmal.';
+    msg.className = all ? 'msg good' : 'msg bad';
+    if (all) { sWin(); confetti(30); } else if (right > 0) { sPart(); } else { sBad(); }
   });
 })();
 </script>
+
 <button id="fs-toggle-btn" type="button" aria-label="Vollbild umschalten">⛶ MAXIMIEREN</button>
 <style>
   #fs-toggle-btn {
-    position: fixed; top: 10px; right: 10px; z-index: 9999;
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 11px; line-height: 1;
-    padding: 9px 11px; background: #171a1a; color: #a951ed;
-    border: 2px solid #a951ed; box-shadow: 3px 3px 0 #000; cursor: pointer;
-    white-space: nowrap;
+    position: fixed; top: 14px; right: 14px; z-index: 9999;
+    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 10px; letter-spacing: 0.12em; line-height: 1;
+    padding: 10px 13px; border-radius: 9px; cursor: pointer; white-space: nowrap;
+    color: #ecd9ff;
+    background: linear-gradient(150deg, rgba(106,0,224,0.9), rgba(60,0,130,0.92));
+    border: 1px solid rgba(169,81,237,0.75);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 8px 22px rgba(106,0,224,0.5);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
   }
-  #fs-toggle-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #000; }
+  #fs-toggle-btn:hover { transform: translateY(-2px); filter: brightness(1.18); box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 12px 28px rgba(106,0,224,0.68); }
+  #fs-toggle-btn:active { transform: translateY(1px); }
   #fs-toggle-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 </style>
 <script>

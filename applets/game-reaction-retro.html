@@ -8,241 +8,350 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #000000; --panel: #171a1a; --ink: #f9f9f9; --ink-dim: #a9a9a9;
-    --accent: #6a00e0; --accent-light: #a951ed; --gold: #ff33a7; --teal: #00ff74;
+    --bg: #05030a;
+    --ink: #f9f9f9; --ink-dim: #8b8b96;
+    --violet: #6a00e0; --violet-light: #a951ed;
+    --pink: #ff33a7; --green: #00ff74;
   }
   * { box-sizing: border-box; }
-  @keyframes targetPop {
-    0% { transform: scale(0); opacity: 0; }
-    60% { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(1); }
+
+  @keyframes drift {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(3%, -4%) scale(1.14); }
   }
-  @keyframes targetGlow {
-    0%, 100% { box-shadow: 3px 3px 0 #000, 0 0 10px 2px currentColor; }
-    50% { box-shadow: 3px 3px 0 #000, 0 0 20px 6px currentColor; }
+  @keyframes titleShine {
+    0%, 100% { filter: drop-shadow(0 0 16px rgba(255,51,167,0.5)); }
+    50%      { filter: drop-shadow(0 0 30px rgba(255,51,167,0.9)); }
   }
-  @keyframes scoreBump {
-    0% { transform: scale(1); }
-    40% { transform: scale(1.35); }
-    100% { transform: scale(1); }
+  @keyframes targetIn {
+    0%   { transform: scale(0) rotate(-45deg); opacity: 0; }
+    65%  { transform: scale(1.22) rotate(6deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); }
   }
-  @keyframes timerUrgent {
-    0%, 100% { color: var(--gold); text-shadow: 0 0 8px rgba(255,51,167,0.7); }
-    50% { color: #ff5050; text-shadow: 0 0 16px rgba(255,80,80,0.9); }
+  @keyframes targetHalo {
+    0%, 100% { box-shadow: 0 0 16px 3px currentColor, inset 0 1px 0 rgba(255,255,255,0.4); }
+    50%      { box-shadow: 0 0 30px 9px currentColor, inset 0 1px 0 rgba(255,255,255,0.4); }
+  }
+  @keyframes ripple {
+    0%   { transform: translate(-50%,-50%) scale(0.3); opacity: 0.85; }
+    100% { transform: translate(-50%,-50%) scale(3.4); opacity: 0; }
   }
   @keyframes floatUp {
-    0% { transform: translateY(0) scale(0.8); opacity: 1; }
-    100% { transform: translateY(-40px) scale(1.1); opacity: 0; }
+    0%   { transform: translate(-50%, 0) scale(0.7); opacity: 1; }
+    100% { transform: translate(-50%, -52px) scale(1.18); opacity: 0; }
   }
-  @keyframes flashScreen {
-    0% { background: rgba(0,255,116,0.18); }
-    100% { background: rgba(0,255,116,0); }
+  @keyframes statPop { 0% { transform: scale(1); } 45% { transform: scale(1.22); } 100% { transform: scale(1); } }
+  @keyframes urgent {
+    0%, 100% { color: var(--pink); }
+    50%      { color: #ff5b5b; text-shadow: 0 0 18px rgba(255,91,91,0.95); }
   }
-  @keyframes titleGlow {
-    0%, 100% { text-shadow: 0 0 8px var(--gold), 0 0 20px rgba(255,51,167,0.7); }
-    50% { text-shadow: 0 0 14px var(--gold), 0 0 32px rgba(255,51,167,1); }
+  @keyframes overlayIn {
+    0%   { opacity: 0; transform: translateY(20px) scale(0.94); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
   }
   @keyframes confettiFall {
-    0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(60vh) rotate(540deg); opacity: 0; }
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
   }
-  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'Roboto Mono', monospace; height: 100vh; overflow: hidden; }
-  .hud {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 150px 14px 18px; font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 14px;
-    position: relative; z-index: 3;
+
+  html, body {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    background: var(--bg); color: var(--ink); font-family: 'Roboto Mono', monospace;
   }
-  .hud .score { color: var(--teal); text-shadow: 0 0 8px rgba(0,255,116,0.7); display: inline-block; }
-  .hud .score.bump { animation: scoreBump 0.3s ease; }
-  .hud .timer { color: var(--gold); text-shadow: 0 0 8px rgba(255,51,167,0.6); }
-  .hud .timer.urgent { animation: timerUrgent 0.6s ease-in-out infinite; }
-  .arena {
-    position: relative; width: 100%; height: calc(100vh - 56px); overflow: hidden;
+  body::before {
+    content: ''; position: fixed; inset: -20%; z-index: 0; pointer-events: none;
     background:
-      linear-gradient(0deg, transparent 24%, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.04) 26%, transparent 27%, transparent 74%, rgba(255,255,255,0.04) 75%, rgba(255,255,255,0.04) 76%, transparent 77%),
-      linear-gradient(90deg, transparent 24%, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.04) 26%, transparent 27%, transparent 74%, rgba(255,255,255,0.04) 75%, rgba(255,255,255,0.04) 76%, transparent 77%),
-      radial-gradient(circle at 50% 50%, rgba(106,0,224,0.15), transparent 60%);
-    background-size: 40px 40px, 40px 40px, 100% 100%;
+      radial-gradient(ellipse 55% 45% at 20% 16%, rgba(106,0,224,0.5), transparent 62%),
+      radial-gradient(ellipse 50% 40% at 82% 84%, rgba(255,51,167,0.38), transparent 62%),
+      radial-gradient(ellipse 45% 35% at 55% 50%, rgba(0,255,116,0.12), transparent 62%);
+    animation: drift 19s ease-in-out infinite alternate;
   }
+
+  .hud {
+    position: relative; z-index: 6;
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 150px 12px 16px;
+  }
+  .stat {
+    min-width: 74px; padding: 8px 12px; border-radius: 11px; text-align: center;
+    background: linear-gradient(160deg, rgba(169,81,237,0.22), rgba(10,8,18,0.9));
+    border: 1px solid rgba(169,81,237,0.36);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 20px rgba(0,0,0,0.5);
+  }
+  .stat .k { display: block; font-size: 8.5px; letter-spacing: 0.2em; color: var(--ink-dim); margin-bottom: 4px; }
+  .stat .v { display: block; font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  #s-score .v { color: var(--green); }
+  #s-time .v  { color: var(--pink); }
+  .stat.pop .v { animation: statPop 0.3s ease; }
+  #s-time.urgent .v { animation: urgent 0.55s ease-in-out infinite; }
+
+  .combo { flex: 1; min-width: 0; }
+  .combo .lbl { display: flex; justify-content: space-between; font-size: 8.5px; letter-spacing: 0.2em; color: var(--ink-dim); margin-bottom: 5px; }
+  .combo .lbl b { color: var(--violet-light); font-size: 10px; }
+  .combo .track { height: 7px; border-radius: 99px; background: rgba(255,255,255,0.09); overflow: hidden; }
+  .combo .track i {
+    display: block; height: 100%; width: 0%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--violet), var(--violet-light), var(--pink), var(--green));
+    box-shadow: 0 0 12px rgba(255,51,167,0.8); transition: width 0.12s linear;
+  }
+
+  .arena {
+    position: relative; z-index: 2; width: 100%; height: calc(100vh - 66px); overflow: hidden;
+    cursor: crosshair;
+    background-image:
+      linear-gradient(rgba(169,81,237,0.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(169,81,237,0.09) 1px, transparent 1px);
+    background-size: 46px 46px;
+    -webkit-mask-image: radial-gradient(ellipse 78% 78% at 50% 45%, #000 40%, transparent 88%);
+    mask-image: radial-gradient(ellipse 78% 78% at 50% 45%, #000 40%, transparent 88%);
+  }
+
   .target {
-    position: absolute; width: 46px; height: 46px; border-radius: 8px;
-    border: 3px solid var(--ink); cursor: pointer;
-    display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff;
-    animation: targetPop 0.25s cubic-bezier(.3,1.6,.4,1), targetGlow 1s ease-in-out infinite;
+    position: absolute; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; color: #fff; border: 2px solid rgba(255,255,255,0.85);
+    animation: targetIn 0.26s cubic-bezier(.3,1.6,.4,1), targetHalo 1.1s ease-in-out infinite 0.26s;
   }
-  .flash-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
-  .flash-overlay.hit { animation: flashScreen 0.25s ease-out; }
-  .float-pop {
-    position: absolute; pointer-events: none; font-weight: 700; font-size: 15px; color: var(--teal);
-    text-shadow: 0 0 8px rgba(0,255,116,0.8); animation: floatUp 0.6s ease-out forwards; z-index: 4;
+  .target::after {
+    content: ''; position: absolute; inset: 5px; border-radius: 50%;
+    border: 1px dashed rgba(255,255,255,0.45);
   }
-  .start-overlay {
-    position: absolute; inset: 0; background: rgba(10,5,20,0.9); z-index: 5;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  .ripple {
+    position: absolute; width: 60px; height: 60px; border-radius: 50%; pointer-events: none;
+    border: 2px solid rgba(255,255,255,0.9); animation: ripple 0.5s ease-out forwards;
   }
-  .start-overlay h1 { font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 28px; color: var(--gold); margin: 0; letter-spacing: 1px; animation: titleGlow 2.5s ease-in-out infinite; }
-  .start-overlay p { color: var(--ink-dim); font-size: 17px; margin: 0; text-align: center; padding: 0 20px; }
-  .start-btn {
-    padding: 12px 24px; background: var(--accent); color: #fff; border: 3px solid var(--ink);
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 14px; cursor: pointer;
-    box-shadow: 4px 4px 0 #000, 0 0 16px 2px rgba(106,0,224,0.7);
+  .pop {
+    position: absolute; pointer-events: none; font-weight: 700; font-size: 14px; color: var(--green);
+    text-shadow: 0 0 12px rgba(0,255,116,0.9); animation: floatUp 0.65s ease-out forwards; white-space: nowrap;
   }
-  .start-btn:hover { background: var(--accent-light); }
-  .start-btn:active { transform: translate(4px,4px); box-shadow: 0 0 0 #000; }
-  .confetti-piece { position: absolute; top: 0; width: 8px; height: 8px; pointer-events: none; animation: confettiFall 1.6s ease-in forwards; z-index: 6; }
+
+  .veil {
+    position: absolute; inset: 0; z-index: 8; display: flex; align-items: center; justify-content: center; padding: 20px;
+    background: radial-gradient(ellipse at center, rgba(18,4,38,0.82), rgba(3,2,8,0.95));
+    backdrop-filter: blur(5px);
+  }
+  .veil.hide { display: none; }
+  .panel {
+    width: 100%; max-width: 350px; text-align: center; padding: 30px 26px 26px; border-radius: 20px;
+    background: linear-gradient(165deg, rgba(169,81,237,0.24), rgba(10,8,18,0.95));
+    border: 1px solid rgba(169,81,237,0.5);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 26px 70px rgba(0,0,0,0.72), 0 0 50px rgba(255,51,167,0.26);
+    animation: overlayIn 0.4s cubic-bezier(.25,1.3,.4,1);
+  }
+  .eyebrow { font-size: 9.5px; letter-spacing: 0.34em; color: var(--violet-light); margin: 0 0 9px; text-transform: uppercase; }
+  .panel h1 {
+    margin: 0 0 10px; font-size: clamp(26px, 7vw, 36px); font-weight: 700; letter-spacing: 0.06em; line-height: 1;
+    background: linear-gradient(170deg, #ffffff 8%, var(--pink) 60%, var(--violet-light) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: titleShine 3s ease-in-out infinite;
+  }
+  .panel p { margin: 0 0 20px; font-size: 13px; color: var(--ink-dim); line-height: 1.5; }
+  .panel .end-stats { display: flex; gap: 9px; justify-content: center; margin-bottom: 20px; }
+  .btn {
+    width: 100%; padding: 15px; border-radius: 12px; cursor: pointer;
+    font-family: inherit; font-weight: 700; font-size: 12px; letter-spacing: 0.18em; color: #fff;
+    background: linear-gradient(150deg, var(--violet-light), var(--violet) 60%, #45009c);
+    border: 1px solid rgba(255,255,255,0.26);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.32), 0 12px 30px rgba(106,0,224,0.55);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+  }
+  .btn:hover { transform: translateY(-2px); filter: brightness(1.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 16px 38px rgba(106,0,224,0.7); }
+  .btn:active { transform: translateY(1px); }
+
+  .confetti { position: fixed; top: -20px; width: 9px; height: 9px; z-index: 40; pointer-events: none; animation: confettiFall 2s ease-in forwards; }
 </style>
 </head>
 <body>
 <div class="hud">
-  <span class="score" id="score">PUNKTE: 0</span>
-  <span class="timer" id="timer">ZEIT: 20</span>
+  <div class="stat" id="s-score"><span class="k">PUNKTE</span><span class="v" id="v-score">0</span></div>
+  <div class="combo">
+    <div class="lbl"><span>COMBO</span><b id="v-combo">x1</b></div>
+    <div class="track"><i id="combo-bar"></i></div>
+  </div>
+  <div class="stat" id="s-time"><span class="k">ZEIT</span><span class="v" id="v-time">20</span></div>
 </div>
+
 <div class="arena" id="arena">
-  <div class="flash-overlay" id="flash"></div>
-  <div class="start-overlay" id="start-overlay">
-    <h1>BLITZ-TIPPER</h1>
-    <p>Tippe so viele Ziele wie möglich in 20 Sekunden</p>
-    <button class="start-btn" id="start-btn">START</button>
+  <div class="veil" id="veil">
+    <div class="panel" id="panel">
+      <p class="eyebrow">Reaktionstest</p>
+      <h1>BLITZ-TIPPER</h1>
+      <p>Triff so viele Ziele wie möglich in 20&nbsp;Sekunden.<br>Schnell hintereinander treffen baut deine Combo auf.</p>
+      <button class="btn" id="start">START</button>
+    </div>
   </div>
 </div>
+
 <script>
 (function(){
+  "use strict";
   const arena = document.getElementById('arena');
-  const flash = document.getElementById('flash');
-  const scoreEl = document.getElementById('score');
-  const timerEl = document.getElementById('timer');
-  const startOverlay = document.getElementById('start-overlay');
-  const startBtn = document.getElementById('start-btn');
-  const targetColors = ['#6a00e0', '#a951ed', '#ff33a7', '#00ff74'];
+  const veil  = document.getElementById('veil');
+  const panel = document.getElementById('panel');
+  const vScore = document.getElementById('v-score');
+  const vTime  = document.getElementById('v-time');
+  const vCombo = document.getElementById('v-combo');
+  const sScore = document.getElementById('s-score');
+  const sTime  = document.getElementById('s-time');
+  const comboBar = document.getElementById('combo-bar');
 
-  let score = 0, timeLeft = 20, running = false, countdownTimer = null;
-  let currentTarget = null, lastHitTime = 0, combo = 0;
+  const COLORS = ['#6a00e0', '#a951ed', '#ff33a7', '#00ff74'];
+  const DURATION = 20, COMBO_WINDOW = 900;
+
+  let score = 0, timeLeft = DURATION, combo = 0, bestCombo = 0, hits = 0;
+  let current = null, countdown = null, comboRaf = null, lastHit = 0, running = false;
 
   let actx = null;
-  function beep(freq, dur, type) {
+  function tone(freq, dur, type, vol) {
     try {
       actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-      const osc = actx.createOscillator();
-      const gain = actx.createGain();
-      osc.type = type || 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.15, actx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
-      osc.connect(gain); gain.connect(actx.destination);
-      osc.start(); osc.stop(actx.currentTime + dur);
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol == null ? 0.13 : vol, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(); o.stop(actx.currentTime + dur);
     } catch (e) {}
   }
-  function sfxHit(combo) { beep(440 + combo * 40, 0.09, 'square'); }
-  function sfxTick() { beep(880, 0.05, 'square'); }
-  function sfxEnd() { [392, 523, 659].forEach((f, i) => setTimeout(() => beep(f, 0.16, 'triangle'), i * 90)); }
+  const sHit  = (c) => tone(440 + Math.min(c,10)*55, 0.08, 'square', 0.12);
+  const sTick = () => tone(950, 0.05, 'square', 0.09);
+  const sEnd  = () => [392,523,659,784].forEach((f,i) => setTimeout(() => tone(f, 0.18, 'triangle'), i*90));
 
-  const confettiColors = ['#ff33a7', '#a951ed', '#00ff74', '#6a00e0', '#f9f9f9'];
-  function burstConfetti(count) {
-    for (let i = 0; i < count; i++) {
-      const piece = document.createElement('div');
-      piece.className = 'confetti-piece';
-      piece.style.left = Math.random() * 100 + '%';
-      piece.style.background = confettiColors[i % confettiColors.length];
-      piece.style.animationDelay = (Math.random() * 0.3) + 's';
-      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-      arena.appendChild(piece);
-      setTimeout(() => piece.remove(), 2000);
+  const cc = ['#ff33a7','#a951ed','#00ff74','#6a00e0','#ffffff'];
+  function confetti(n) {
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti';
+      p.style.left = Math.random()*100 + 'vw';
+      p.style.background = cc[i % cc.length];
+      p.style.animationDelay = (Math.random()*0.4) + 's';
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 2500);
     }
   }
+  function pop(el) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
 
-  function bumpScore() {
-    scoreEl.classList.remove('bump');
-    void scoreEl.offsetWidth;
-    scoreEl.classList.add('bump');
+  // Combo decays continuously so the bar drains in real time, not per second.
+  function comboLoop() {
+    if (!running) return;
+    const left = Math.max(0, COMBO_WINDOW - (performance.now() - lastHit));
+    comboBar.style.width = (combo > 0 ? (left / COMBO_WINDOW) * 100 : 0) + '%';
+    if (combo > 0 && left === 0) { combo = 0; vCombo.textContent = 'x1'; }
+    comboRaf = requestAnimationFrame(comboLoop);
   }
 
-  function floatPop(x, y, text) {
-    const el = document.createElement('div');
-    el.className = 'float-pop';
-    el.textContent = text;
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
-    arena.appendChild(el);
-    setTimeout(() => el.remove(), 650);
-  }
-
-  function spawnTarget() {
-    if (currentTarget) currentTarget.remove();
-    const target = document.createElement('div');
-    target.className = 'target';
-    target.textContent = '★';
-    const color = targetColors[Math.floor(Math.random() * targetColors.length)];
-    target.style.background = color;
-    target.style.color = color;
-    const size = 46 - Math.min(16, Math.floor(score / 3));
-    target.style.width = size + 'px';
-    target.style.height = size + 'px';
+  function spawn() {
+    if (current) current.remove();
+    const size = Math.max(30, 52 - Math.floor(score / 3) * 2);
+    const color = COLORS[(Math.random()*COLORS.length)|0];
     const w = arena.clientWidth, h = arena.clientHeight;
-    const x = Math.random() * (w - size - 12) + 6;
-    const y = Math.random() * (h - size - 12) + 6;
-    target.style.left = x + 'px';
-    target.style.top = y + 'px';
-    target.addEventListener('click', (e) => {
-      const now = performance.now();
-      combo = (now - lastHitTime < 900) ? combo + 1 : 1;
-      lastHitTime = now;
-      score++;
-      scoreEl.textContent = `PUNKTE: ${score}`;
-      bumpScore();
-      sfxHit(Math.min(combo, 8));
-      floatPop(x + size / 2 - 10, y, combo > 1 ? `+1 x${combo}` : '+1');
-      flash.classList.remove('hit'); void flash.offsetWidth; flash.classList.add('hit');
-      spawnTarget();
+    const x = Math.random() * (w - size - 24) + 12;
+    const y = Math.random() * (h - size - 24) + 12;
+
+    const t = document.createElement('div');
+    t.className = 'target';
+    t.textContent = '✦';
+    t.style.cssText =
+      'width:' + size + 'px;height:' + size + 'px;left:' + x + 'px;top:' + y + 'px;color:' + color +
+      ';background:radial-gradient(circle at 32% 28%, rgba(255,255,255,0.5), ' + color + ' 62%);';
+    t.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      hit(x + size/2, y + size/2, color);
     });
-    arena.appendChild(target);
-    currentTarget = target;
+    arena.appendChild(t);
+    current = t;
   }
 
-  function startGame() {
-    score = 0; timeLeft = 20; running = true; combo = 0; lastHitTime = 0;
-    scoreEl.textContent = 'PUNKTE: 0';
-    timerEl.textContent = 'ZEIT: 20';
-    timerEl.classList.remove('urgent');
-    startOverlay.style.display = 'none';
-    spawnTarget();
-    countdownTimer = setInterval(() => {
+  function hit(cx, cy, color) {
+    const now = performance.now();
+    combo = (now - lastHit < COMBO_WINDOW) ? combo + 1 : 1;
+    lastHit = now;
+    bestCombo = Math.max(bestCombo, combo);
+    hits++;
+
+    const mult = Math.min(combo, 5);
+    score += mult;
+    vScore.textContent = score;
+    vCombo.textContent = 'x' + mult;
+    pop(sScore);
+    sHit(combo);
+
+    const r = document.createElement('div');
+    r.className = 'ripple';
+    r.style.left = cx + 'px'; r.style.top = cy + 'px'; r.style.borderColor = color;
+    arena.appendChild(r);
+    setTimeout(() => r.remove(), 520);
+
+    const p = document.createElement('div');
+    p.className = 'pop';
+    p.textContent = combo > 1 ? '+' + mult + '  x' + mult : '+1';
+    p.style.left = cx + 'px'; p.style.top = (cy - 12) + 'px';
+    arena.appendChild(p);
+    setTimeout(() => p.remove(), 680);
+
+    spawn();
+  }
+
+  function start() {
+    score = 0; timeLeft = DURATION; combo = 0; bestCombo = 0; hits = 0;
+    lastHit = 0; running = true;
+    vScore.textContent = '0'; vTime.textContent = DURATION; vCombo.textContent = 'x1';
+    comboBar.style.width = '0%';
+    sTime.classList.remove('urgent');
+    veil.classList.add('hide');
+    spawn();
+    comboLoop();
+    countdown = setInterval(() => {
       timeLeft--;
-      timerEl.textContent = `ZEIT: ${timeLeft}`;
-      if (timeLeft <= 5 && timeLeft > 0) { timerEl.classList.add('urgent'); sfxTick(); }
-      if (timeLeft <= 0) endGame();
+      vTime.textContent = timeLeft;
+      if (timeLeft <= 5 && timeLeft > 0) { sTime.classList.add('urgent'); sTick(); }
+      if (timeLeft <= 0) end();
     }, 1000);
   }
 
-  function endGame() {
+  function end() {
     running = false;
-    clearInterval(countdownTimer);
-    timerEl.classList.remove('urgent');
-    if (currentTarget) { currentTarget.remove(); currentTarget = null; }
-    const great = score >= 15;
-    startOverlay.innerHTML = `
-      <h1>ZEIT UM!</h1>
-      <p>Du hast ${score} Ziele getroffen</p>
-      <button class="start-btn" id="restart-btn">NOCHMAL</button>
-    `;
-    startOverlay.style.display = 'flex';
-    sfxEnd();
-    if (great) burstConfetti(24);
-    document.getElementById('restart-btn').addEventListener('click', startGame);
+    clearInterval(countdown);
+    cancelAnimationFrame(comboRaf);
+    sTime.classList.remove('urgent');
+    if (current) { current.remove(); current = null; }
+    comboBar.style.width = '0%';
+
+    const great = score >= 30;
+    panel.innerHTML =
+      '<p class="eyebrow">Zeit abgelaufen</p>' +
+      '<h1>' + (great ? 'STARK!' : 'ZEIT UM!') + '</h1>' +
+      '<div class="end-stats">' +
+        '<div class="stat"><span class="k">PUNKTE</span><span class="v">' + score + '</span></div>' +
+        '<div class="stat"><span class="k">TREFFER</span><span class="v">' + hits + '</span></div>' +
+        '<div class="stat"><span class="k">COMBO</span><span class="v">x' + Math.min(bestCombo,5) + '</span></div>' +
+      '</div>' +
+      '<button class="btn" id="again">NOCHMAL</button>';
+    veil.classList.remove('hide');
+    sEnd();
+    if (great) confetti(34);
+    document.getElementById('again').addEventListener('click', start);
   }
 
-  startBtn.addEventListener('click', startGame);
+  document.getElementById('start').addEventListener('click', start);
 })();
 </script>
+
 <button id="fs-toggle-btn" type="button" aria-label="Vollbild umschalten">⛶ MAXIMIEREN</button>
 <style>
   #fs-toggle-btn {
-    position: fixed; top: 10px; right: 10px; z-index: 9999;
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 11px; line-height: 1;
-    padding: 9px 11px; background: #171a1a; color: #a951ed;
-    border: 2px solid #a951ed; box-shadow: 3px 3px 0 #000; cursor: pointer;
-    white-space: nowrap;
+    position: fixed; top: 14px; right: 14px; z-index: 9999;
+    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 10px; letter-spacing: 0.12em; line-height: 1;
+    padding: 10px 13px; border-radius: 9px; cursor: pointer; white-space: nowrap;
+    color: #ecd9ff;
+    background: linear-gradient(150deg, rgba(106,0,224,0.9), rgba(60,0,130,0.92));
+    border: 1px solid rgba(169,81,237,0.75);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 8px 22px rgba(106,0,224,0.5);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
   }
-  #fs-toggle-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #000; }
+  #fs-toggle-btn:hover { transform: translateY(-2px); filter: brightness(1.18); box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 12px 28px rgba(106,0,224,0.68); }
+  #fs-toggle-btn:active { transform: translateY(1px); }
   #fs-toggle-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 </style>
 <script>

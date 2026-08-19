@@ -8,32 +8,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #000000; --panel: #171a1a; --panel-light: #23282a;
-    --ink: #f9f9f9; --ink-dim: #a9a9a9;
-    --accent: #6a00e0; --accent-dark: #4c009e; --accent-light: #a951ed;
-    --gold: #ff33a7; --teal: #00ff74;
+    --bg: #05030a;
+    --ink: #f9f9f9; --ink-dim: #8b8b96;
+    --violet: #6a00e0; --violet-light: #a951ed;
+    --pink: #ff33a7; --green: #00ff74;
   }
   * { box-sizing: border-box; }
-  @keyframes bgPulse {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+
+  @keyframes drift {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(4%, -3%) scale(1.12); }
   }
-  @keyframes borderGlow {
-    0%, 100% { box-shadow: 0 0 0 4px var(--bg), 0 0 0 8px var(--accent-light), 0 0 24px 4px rgba(169,81,237,0.55), 8px 8px 0 8px rgba(0,0,0,0.5); }
-    50% { box-shadow: 0 0 0 4px var(--bg), 0 0 0 8px var(--gold), 0 0 32px 8px rgba(255,51,167,0.6), 8px 8px 0 8px rgba(0,0,0,0.5); }
+  @keyframes titleShine {
+    0%, 100% { filter: drop-shadow(0 0 14px rgba(255,51,167,0.45)); }
+    50%      { filter: drop-shadow(0 0 26px rgba(255,51,167,0.85)); }
   }
-  @keyframes titleFlicker {
-    0%, 92%, 100% { opacity: 1; text-shadow: 0 0 6px var(--gold), 0 0 18px rgba(255,51,167,0.7); }
-    93% { opacity: 0.6; text-shadow: none; }
-    95% { opacity: 1; text-shadow: 0 0 6px var(--gold), 0 0 18px rgba(255,51,167,0.7); }
-  }
-  @keyframes shimmer {
-    0% { background-position: -120px 0; }
-    100% { background-position: 120px 0; }
-  }
-  @keyframes popIn {
-    0% { opacity: 0; transform: translateY(10px) scale(0.97); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+  @keyframes riseIn {
+    0%   { opacity: 0; transform: translateY(16px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
   @keyframes shakeX {
     10%, 90% { transform: translateX(-2px); }
@@ -41,218 +33,327 @@
     30%, 50%, 70% { transform: translateX(-8px); }
     40%, 60% { transform: translateX(8px); }
   }
-  @keyframes correctGlow {
-    0% { box-shadow: 0 0 0 0 rgba(0,255,116,0.7); }
-    100% { box-shadow: 0 0 26px 8px rgba(0,255,116,0); }
+  @keyframes goodPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(0,255,116,0.7), 0 10px 26px rgba(0,0,0,0.5); }
+    100% { box-shadow: 0 0 0 18px rgba(0,255,116,0), 0 10px 26px rgba(0,0,0,0.5); }
   }
-  @keyframes scoreCountBounce {
-    0% { transform: scale(0.4); opacity: 0; }
-    60% { transform: scale(1.15); opacity: 1; }
+  @keyframes ringDraw { 0% { stroke-dashoffset: 339; } }
+  @keyframes scoreIn {
+    0%   { opacity: 0; transform: scale(0.4); }
+    65%  { opacity: 1; transform: scale(1.16); }
     100% { transform: scale(1); }
   }
   @keyframes confettiFall {
-    0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(340px) rotate(540deg); opacity: 0; }
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
   }
+
   html, body {
-    margin: 0; padding: 0; min-height: 100vh;
-    background:
-      radial-gradient(circle at 20% 20%, rgba(106,0,224,0.35), transparent 45%),
-      radial-gradient(circle at 80% 80%, rgba(255,51,167,0.25), transparent 45%),
-      linear-gradient(120deg, #000000, #0d0518, #000000);
-    background-size: 200% 200%;
-    animation: bgPulse 12s ease infinite;
-    color: var(--ink);
+    margin: 0; padding: 0; min-height: 100%;
+    background: var(--bg); color: var(--ink);
     font-family: 'Roboto Mono', monospace;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; inset: -20%; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 55% 45% at 82% 14%, rgba(106,0,224,0.55), transparent 62%),
+      radial-gradient(ellipse 50% 40% at 14% 84%, rgba(255,51,167,0.4), transparent 62%),
+      radial-gradient(ellipse 45% 35% at 45% 45%, rgba(0,255,116,0.12), transparent 62%);
+    animation: drift 22s ease-in-out infinite alternate;
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(169,81,237,0.10) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(169,81,237,0.10) 1px, transparent 1px),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.28) 0 1px, transparent 1px 3px);
+    background-size: 46px 46px, 46px 46px, 100% 3px;
+    -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 82%);
+    mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 82%);
+  }
+
+  .stage {
+    position: relative; z-index: 2; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center; padding: 56px 20px 24px;
   }
   .card {
-    position: relative;
-    max-width: 460px; width: 100%; margin: 20px;
-    background: var(--panel);
-    border: 4px solid var(--ink);
-    animation: borderGlow 3.2s ease-in-out infinite;
-    padding: 26px 24px;
-    overflow: hidden;
+    position: relative; width: 100%; max-width: 520px; padding: 26px 26px 24px; border-radius: 20px;
+    background: linear-gradient(165deg, rgba(169,81,237,0.16), rgba(9,7,16,0.93));
+    border: 1px solid rgba(169,81,237,0.4);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 26px 66px rgba(0,0,0,0.66), 0 0 46px rgba(106,0,224,0.22);
+    backdrop-filter: blur(10px); overflow: hidden;
   }
+  .card.shake { animation: shakeX 0.42s ease; }
+
+  .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+  .eyebrow { font-size: 9.5px; letter-spacing: 0.34em; color: var(--violet-light); margin: 0 0 7px; text-transform: uppercase; }
   h1 {
-    font-size: 22px; color: var(--gold); text-align: center; margin: 0 0 6px;
-    font-family: 'Roboto Mono', monospace; font-weight: 700; letter-spacing: 1px;
-    animation: titleFlicker 5s linear infinite;
+    margin: 0; font-size: clamp(22px, 5.4vw, 30px); font-weight: 700; letter-spacing: 0.05em; line-height: 1;
+    background: linear-gradient(170deg, #ffffff 8%, var(--pink) 62%, var(--violet-light) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: titleShine 3.4s ease-in-out infinite;
   }
-  .progress { font-size: 15px; color: var(--ink-dim); text-align: center; margin-bottom: 18px; }
-  .bar-track { background: var(--panel-light); height: 10px; border: 2px solid var(--ink); margin-bottom: 22px; overflow: hidden; }
-  .bar-fill {
-    height: 100%; width: 0%; transition: width 0.4s ease;
-    background: linear-gradient(90deg, var(--accent-light), var(--gold), var(--teal), var(--accent-light));
-    background-size: 240px 100%;
-    animation: shimmer 1.6s linear infinite;
-    box-shadow: 0 0 10px 1px rgba(169,81,237,0.8);
+  .stat {
+    min-width: 66px; padding: 8px 11px; border-radius: 11px; text-align: center; flex-shrink: 0;
+    background: linear-gradient(160deg, rgba(169,81,237,0.22), rgba(10,8,18,0.86));
+    border: 1px solid rgba(169,81,237,0.34);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
   }
-  .question { font-size: 19px; margin-bottom: 18px; line-height: 1.4; animation: popIn 0.35s ease; }
-  .options { display: flex; flex-direction: column; gap: 10px; }
+  .stat .k { display: block; font-size: 8.5px; letter-spacing: 0.2em; color: var(--ink-dim); margin-bottom: 4px; }
+  .stat .v { display: block; font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .pips { display: flex; gap: 6px; margin-bottom: 20px; }
+  .pip { flex: 1; height: 4px; border-radius: 99px; background: rgba(255,255,255,0.1); overflow: hidden; }
+  .pip i { display: block; height: 100%; width: 0%; border-radius: 99px; transition: width 0.4s ease; }
+  .pip.done i { width: 100%; background: linear-gradient(90deg, var(--violet-light), var(--pink)); box-shadow: 0 0 10px rgba(255,51,167,0.7); }
+  .pip.good i { width: 100%; background: linear-gradient(90deg, var(--green), #8effc4); box-shadow: 0 0 10px rgba(0,255,116,0.7); }
+  .pip.now i { width: 100%; background: rgba(255,255,255,0.28); }
+
+  .q { font-size: clamp(16px, 3.6vw, 19px); line-height: 1.45; margin: 0 0 18px; animation: riseIn 0.35s ease; }
+
+  .opts { display: flex; flex-direction: column; gap: 9px; }
   .opt {
-    border: 3px solid var(--ink); background: var(--panel-light); color: var(--ink);
-    padding: 12px 14px; font-size: 16px; text-align: left; cursor: pointer;
-    box-shadow: 3px 3px 0 #000;
-    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background 0.12s ease;
-    animation: popIn 0.35s ease backwards;
+    display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; cursor: pointer;
+    padding: 13px 14px; border-radius: 13px; font-family: inherit; font-size: 14.5px; color: var(--ink);
+    background: linear-gradient(150deg, rgba(255,255,255,0.09), rgba(12,9,20,0.9));
+    border: 1px solid rgba(255,255,255,0.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 22px rgba(0,0,0,0.42);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease, background 0.2s ease;
+    animation: riseIn 0.35s backwards ease;
   }
-  .opt:nth-child(1) { animation-delay: 0.02s; }
-  .opt:nth-child(2) { animation-delay: 0.08s; }
-  .opt:nth-child(3) { animation-delay: 0.14s; }
+  .opt:nth-child(1) { animation-delay: 0.04s; }
+  .opt:nth-child(2) { animation-delay: 0.10s; }
+  .opt:nth-child(3) { animation-delay: 0.16s; }
+  .opt .badge {
+    flex-shrink: 0; width: 27px; height: 27px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #efe2ff;
+    background: linear-gradient(150deg, rgba(169,81,237,0.85), rgba(76,0,158,0.9));
+    border: 1px solid rgba(255,255,255,0.22);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
   .opt:hover:not(:disabled) {
-    background: #3a2f70; border-color: var(--accent-light);
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0 #000, 0 0 12px 1px rgba(169,81,237,0.6);
+    transform: translateX(4px); border-color: rgba(169,81,237,0.85);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 12px 30px rgba(106,0,224,0.42), 0 0 20px rgba(169,81,237,0.35);
   }
-  .opt:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
-  .opt.correct { background: var(--teal); color: #0f0a1e; border-color: var(--teal); animation: correctGlow 0.7s ease; }
-  .opt.wrong { background: var(--gold); border-color: var(--gold); }
   .opt:disabled { cursor: default; }
-  .card.shake { animation: borderGlow 3.2s ease-in-out infinite, shakeX 0.4s ease; }
-  .feedback { margin-top: 14px; font-size: 15px; color: var(--ink-dim); min-height: 20px; }
-  .next-btn {
-    margin-top: 16px; width: 100%; padding: 12px;
-    background: var(--accent); color: #fff; border: 3px solid var(--ink);
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 13px; cursor: pointer;
-    box-shadow: 4px 4px 0 #000, 0 0 14px 1px rgba(106,0,224,0.7); display: none;
-    transition: transform 0.1s ease;
+  .opt.correct {
+    border-color: var(--green); color: #eafff3;
+    background: linear-gradient(150deg, rgba(0,255,116,0.26), rgba(6,26,16,0.92));
+    animation: goodPulse 0.75s ease;
   }
-  .next-btn:hover { background: var(--accent-light); }
-  .next-btn:active { transform: translate(4px,4px); box-shadow: 0 0 0 #000; }
+  .opt.correct .badge { background: linear-gradient(150deg, var(--green), #00b551); color: #04240f; }
+  .opt.wrong {
+    border-color: var(--pink); color: #ffe6f5;
+    background: linear-gradient(150deg, rgba(255,51,167,0.24), rgba(28,4,18,0.92));
+  }
+  .opt.wrong .badge { background: linear-gradient(150deg, var(--pink), #b8006c); }
+  .opt.dim { opacity: 0.42; }
+
+  .feedback { min-height: 20px; margin: 14px 0 0; font-size: 12.5px; letter-spacing: 0.06em; color: var(--ink-dim); }
+  .feedback.good { color: var(--green); }
+  .feedback.bad { color: var(--pink); }
+
+  .btn {
+    width: 100%; margin-top: 14px; padding: 14px; border-radius: 12px; cursor: pointer;
+    font-family: inherit; font-weight: 700; font-size: 12px; letter-spacing: 0.16em; color: #fff;
+    background: linear-gradient(150deg, var(--violet-light), var(--violet) 60%, #45009c);
+    border: 1px solid rgba(255,255,255,0.26);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.32), 0 12px 30px rgba(106,0,224,0.5);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+  }
+  .btn:hover { transform: translateY(-2px); filter: brightness(1.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 16px 38px rgba(106,0,224,0.68); }
+  .btn:active { transform: translateY(1px); }
+  .btn.hidden { display: none; }
+
+  /* result */
   .result { text-align: center; }
-  .result .score {
-    font-size: 48px; color: var(--gold); font-family: 'Roboto Mono', monospace; font-weight: 700; margin: 14px 0;
-    text-shadow: 0 0 14px rgba(255,51,167,0.8);
-    animation: scoreCountBounce 0.5s cubic-bezier(.2,1.4,.4,1);
+  .ring-wrap { position: relative; width: 132px; height: 132px; margin: 6px auto 14px; animation: scoreIn 0.5s cubic-bezier(.25,1.3,.4,1); }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 9; }
+  .ring-fg { fill: none; stroke: url(#g); stroke-width: 9; stroke-linecap: round; stroke-dasharray: 339; animation: ringDraw 1s cubic-bezier(.3,1,.4,1); }
+  .ring-txt {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
   }
-  .result p { color: var(--ink-dim); font-size: 16px; }
-  .confetti-piece {
-    position: absolute; top: 0; width: 8px; height: 8px; pointer-events: none;
-    animation: confettiFall 1.4s ease-in forwards;
-    z-index: 5;
+  .ring-txt b { font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .ring-txt span { font-size: 10px; letter-spacing: 0.2em; color: var(--ink-dim); margin-top: 5px; }
+  .result h2 {
+    margin: 0 0 6px; font-size: 24px; letter-spacing: 0.05em;
+    background: linear-gradient(170deg, #fff, var(--green));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
   }
+  .result p { margin: 0; font-size: 13px; color: var(--ink-dim); }
+
+  .confetti { position: fixed; top: -20px; width: 9px; height: 9px; z-index: 40; pointer-events: none; animation: confettiFall 2s ease-in forwards; }
 </style>
 </head>
 <body>
-<div class="card" id="card"></div>
+<div class="stage">
+  <div class="card" id="card"></div>
+</div>
+
 <script>
 (function(){
+  "use strict";
   const questions = [
-    { q: 'Welche Maßnahme spart am meisten CO2 im Alltag?', opts: ['Fahrrad statt Auto', 'Licht öfter ausschalten', 'Kürzer duschen'], correct: 0 },
-    { q: 'Was passiert bei steigender Meerestemperatur mit Korallen?', opts: ['Sie wachsen schneller', 'Sie bleichen aus', 'Nichts verändert sich'], correct: 1 },
-    { q: 'Welche Energiequelle ist erneuerbar?', opts: ['Kohle', 'Erdgas', 'Windkraft'], correct: 2 },
-    { q: 'Was bedeutet "CO2-Fußabdruck"?', opts: ['Menge an CO2, die durch das eigene Verhalten verursacht wird', 'Ein Schuh aus recyceltem Material', 'Die Größe eines Waldes'], correct: 0 }
+    { q: 'Welche Maßnahme spart am meisten CO₂ im Alltag?', opts: ['Fahrrad statt Auto', 'Licht öfter ausschalten', 'Kürzer duschen'], correct: 0,
+      why: 'Verkehr ist einer der größten CO₂-Treiber im Alltag.' },
+    { q: 'Was passiert bei steigender Meerestemperatur mit Korallen?', opts: ['Sie wachsen schneller', 'Sie bleichen aus', 'Nichts verändert sich'], correct: 1,
+      why: 'Korallen stoßen bei Hitzestress ihre Algen ab und bleichen.' },
+    { q: 'Welche Energiequelle ist erneuerbar?', opts: ['Kohle', 'Erdgas', 'Windkraft'], correct: 2,
+      why: 'Wind erneuert sich laufend — Kohle und Gas nicht.' },
+    { q: 'Was bedeutet "CO₂-Fußabdruck"?', opts: ['Menge an CO₂, die das eigene Verhalten verursacht', 'Ein Schuh aus recyceltem Material', 'Die Größe eines Waldes'], correct: 0,
+      why: 'Er misst die Treibhausgase, die durch dein Handeln entstehen.' }
   ];
-  let idx = 0, score = 0;
+  const LETTERS = ['A','B','C','D'];
   const card = document.getElementById('card');
+  let idx = 0, score = 0, streak = 0, best = 0;
+  const marks = [];
 
   let actx = null;
-  function beep(freq, dur, type) {
+  function tone(freq, dur, type, vol) {
     try {
       actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-      const osc = actx.createOscillator();
-      const gain = actx.createGain();
-      osc.type = type || 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.16, actx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
-      osc.connect(gain); gain.connect(actx.destination);
-      osc.start(); osc.stop(actx.currentTime + dur);
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol == null ? 0.14 : vol, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(); o.stop(actx.currentTime + dur);
     } catch (e) {}
   }
-  function sfxCorrect() { beep(660, 0.12, 'square'); setTimeout(() => beep(880, 0.16, 'square'), 90); }
-  function sfxWrong() { beep(160, 0.28, 'sawtooth'); }
-  function sfxWin() { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'square'), i * 100)); }
+  const sGood = (n) => { tone(620 + n*60, 0.1, 'square'); setTimeout(() => tone(880 + n*70, 0.15, 'square'), 80); };
+  const sBad  = () => tone(150, 0.26, 'sawtooth', 0.1);
+  const sWin  = () => [523,659,784,1046,1318].forEach((f,i) => setTimeout(() => tone(f, 0.2, 'square'), i*95));
 
-  const confettiColors = ['#ff33a7', '#a951ed', '#00ff74', '#6a00e0', '#f9f9f9'];
-  function burstConfetti(count) {
-    for (let i = 0; i < count; i++) {
-      const piece = document.createElement('div');
-      piece.className = 'confetti-piece';
-      piece.style.left = Math.random() * 100 + '%';
-      piece.style.background = confettiColors[i % confettiColors.length];
-      piece.style.animationDelay = (Math.random() * 0.2) + 's';
-      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-      card.appendChild(piece);
-      setTimeout(() => piece.remove(), 1700);
+  const cc = ['#ff33a7','#a951ed','#00ff74','#6a00e0','#ffffff'];
+  function confetti(n) {
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti';
+      p.style.left = Math.random()*100 + 'vw';
+      p.style.background = cc[i % cc.length];
+      p.style.animationDelay = (Math.random()*0.4) + 's';
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 2500);
     }
+  }
+
+  function pipsHTML() {
+    return '<div class="pips">' + questions.map((_, i) => {
+      const cls = marks[i] === true ? 'pip good' : marks[i] === false ? 'pip done' : i === idx ? 'pip now' : 'pip';
+      return '<div class="' + cls + '"><i></i></div>';
+    }).join('') + '</div>';
   }
 
   function render() {
     if (idx >= questions.length) return renderResult();
     const q = questions[idx];
     card.classList.remove('shake');
-    card.innerHTML = `
-      <h1>KLIMA-QUIZ</h1>
-      <p class="progress">Frage ${idx + 1} von ${questions.length}</p>
-      <div class="bar-track"><div class="bar-fill" style="width:${(idx/questions.length)*100}%"></div></div>
-      <p class="question">${q.q}</p>
-      <div class="options" id="opts"></div>
-      <p class="feedback" id="feedback"></p>
-      <button class="next-btn" id="next-btn">WEITER →</button>
-    `;
-    const optsEl = document.getElementById('opts');
-    q.opts.forEach((opt, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'opt';
-      btn.textContent = opt;
-      btn.addEventListener('click', () => answer(i, btn));
-      optsEl.appendChild(btn);
+    card.innerHTML =
+      '<div class="head">' +
+        '<div><p class="eyebrow">Frage ' + (idx+1) + ' / ' + questions.length + '</p><h1>KLIMA-QUIZ</h1></div>' +
+        '<div class="stat"><span class="k">SERIE</span><span class="v" id="v-streak">' + streak + '</span></div>' +
+      '</div>' +
+      pipsHTML() +
+      '<p class="q">' + q.q + '</p>' +
+      '<div class="opts" id="opts"></div>' +
+      '<p class="feedback" id="fb"></p>' +
+      '<button class="btn hidden" id="next">WEITER →</button>';
+
+    const opts = document.getElementById('opts');
+    q.opts.forEach((text, i) => {
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.innerHTML = '<span class="badge">' + LETTERS[i] + '</span><span>' + text + '</span>';
+      b.addEventListener('click', () => answer(i, b));
+      opts.appendChild(b);
     });
   }
 
   function answer(i, btn) {
     const q = questions[idx];
-    const allBtns = document.querySelectorAll('.opt');
-    allBtns.forEach(b => b.disabled = true);
-    if (i === q.correct) {
+    const all = [...document.querySelectorAll('.opt')];
+    all.forEach(b => b.disabled = true);
+    const fb = document.getElementById('fb');
+    const right = i === q.correct;
+
+    marks[idx] = right;
+    if (right) {
       btn.classList.add('correct');
-      document.getElementById('feedback').textContent = 'Richtig!';
-      score++;
-      sfxCorrect();
-      burstConfetti(14);
+      score++; streak++; best = Math.max(best, streak);
+      document.getElementById('v-streak').textContent = streak;
+      fb.textContent = '✓ ' + q.why;
+      fb.className = 'feedback good';
+      sGood(Math.min(streak, 5));
+      confetti(streak >= 3 ? 20 : 12);
+      all.forEach(b => { if (b !== btn) b.classList.add('dim'); });
     } else {
       btn.classList.add('wrong');
-      allBtns[q.correct].classList.add('correct');
-      document.getElementById('feedback').textContent = 'Nicht ganz — richtig war markiert.';
-      sfxWrong();
+      all[q.correct].classList.add('correct');
+      streak = 0;
+      document.getElementById('v-streak').textContent = '0';
+      fb.textContent = '✕ ' + q.why;
+      fb.className = 'feedback bad';
+      sBad();
       card.classList.add('shake');
-      setTimeout(() => card.classList.remove('shake'), 420);
+      setTimeout(() => card.classList.remove('shake'), 440);
+      all.forEach(b => { if (b !== btn && !b.classList.contains('correct')) b.classList.add('dim'); });
     }
-    document.getElementById('next-btn').style.display = 'block';
-    document.getElementById('next-btn').onclick = () => { idx++; render(); };
+
+    const next = document.getElementById('next');
+    next.classList.remove('hidden');
+    next.textContent = idx === questions.length - 1 ? 'ERGEBNIS ANSEHEN →' : 'WEITER →';
+    next.onclick = () => { idx++; render(); };
   }
 
   function renderResult() {
+    const pct = score / questions.length;
     const perfect = score === questions.length;
-    card.innerHTML = `
-      <div class="result">
-        <h1>ERGEBNIS</h1>
-        <p class="score">${score}/${questions.length}</p>
-        <p>${perfect ? 'Perfekt gemeistert!' : 'Gut gemacht — nochmal versuchen?'}</p>
-        <button class="next-btn" style="display:block" id="restart-btn">NOCHMAL SPIELEN</button>
-      </div>
-    `;
-    if (perfect) { sfxWin(); burstConfetti(30); } else { beep(340, 0.2, 'triangle'); }
-    document.getElementById('restart-btn').onclick = () => { idx = 0; score = 0; render(); };
+    const dash = Math.round(339 * pct);
+    card.innerHTML =
+      '<div class="result">' +
+        '<p class="eyebrow">Klima-Quiz abgeschlossen</p>' +
+        '<div class="ring-wrap">' +
+          '<svg width="132" height="132" viewBox="0 0 132 132">' +
+            '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+              '<stop offset="0%" stop-color="#a951ed"/><stop offset="55%" stop-color="#ff33a7"/><stop offset="100%" stop-color="#00ff74"/>' +
+            '</linearGradient></defs>' +
+            '<circle class="ring-bg" cx="66" cy="66" r="54"/>' +
+            '<circle class="ring-fg" cx="66" cy="66" r="54" stroke-dashoffset="' + (339 - dash) + '"/>' +
+          '</svg>' +
+          '<div class="ring-txt"><b>' + score + '/' + questions.length + '</b><span>PUNKTE</span></div>' +
+        '</div>' +
+        '<h2>' + (perfect ? 'PERFEKT!' : pct >= 0.5 ? 'GUT GEMACHT!' : 'WEITER ÜBEN!') + '</h2>' +
+        '<p>' + (perfect ? 'Alle Fragen richtig — Klima-Profi.' : 'Längste Serie: ' + best + ' · Nochmal versuchen?') + '</p>' +
+        '<button class="btn" id="restart">NOCHMAL SPIELEN</button>' +
+      '</div>';
+    if (perfect) { sWin(); confetti(45); } else { tone(360, 0.22, 'triangle'); }
+    document.getElementById('restart').onclick = () => {
+      idx = 0; score = 0; streak = 0; best = 0; marks.length = 0; render();
+    };
   }
 
   render();
 })();
 </script>
+
 <button id="fs-toggle-btn" type="button" aria-label="Vollbild umschalten">⛶ MAXIMIEREN</button>
 <style>
   #fs-toggle-btn {
-    position: fixed; top: 10px; right: 10px; z-index: 9999;
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 11px; line-height: 1;
-    padding: 9px 11px; background: #171a1a; color: #a951ed;
-    border: 2px solid #a951ed; box-shadow: 3px 3px 0 #000; cursor: pointer;
-    white-space: nowrap;
+    position: fixed; top: 14px; right: 14px; z-index: 9999;
+    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 10px; letter-spacing: 0.12em; line-height: 1;
+    padding: 10px 13px; border-radius: 9px; cursor: pointer; white-space: nowrap;
+    color: #ecd9ff;
+    background: linear-gradient(150deg, rgba(106,0,224,0.9), rgba(60,0,130,0.92));
+    border: 1px solid rgba(169,81,237,0.75);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 8px 22px rgba(106,0,224,0.5);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
   }
-  #fs-toggle-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #000; }
+  #fs-toggle-btn:hover { transform: translateY(-2px); filter: brightness(1.18); box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 12px 28px rgba(106,0,224,0.68); }
+  #fs-toggle-btn:active { transform: translateY(1px); }
   #fs-toggle-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 </style>
 <script>

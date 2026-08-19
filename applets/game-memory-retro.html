@@ -8,224 +8,368 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #000000; --panel: #171a1a; --panel-light: #23282a;
-    --ink: #f9f9f9; --ink-dim: #a9a9a9; --accent: #6a00e0; --accent-light: #a951ed; --gold: #ff33a7; --teal: #00ff74;
+    --bg: #05030a;
+    --ink: #f9f9f9; --ink-dim: #8b8b96;
+    --violet: #6a00e0; --violet-light: #a951ed;
+    --pink: #ff33a7; --green: #00ff74;
   }
   * { box-sizing: border-box; }
-  @keyframes bgPulse {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+
+  @keyframes drift {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(-4%, 3%) scale(1.12); }
   }
-  @keyframes titleGlow {
-    0%, 100% { text-shadow: 0 0 6px var(--gold), 0 0 16px rgba(255,51,167,0.6); }
-    50% { text-shadow: 0 0 10px var(--gold), 0 0 26px rgba(255,51,167,0.9); }
+  @keyframes titleShine {
+    0%, 100% { filter: drop-shadow(0 0 14px rgba(255,51,167,0.45)); }
+    50%      { filter: drop-shadow(0 0 26px rgba(255,51,167,0.85)); }
   }
-  @keyframes matchPulse {
-    0% { box-shadow: 0 0 0 0 rgba(0,255,116,0.8); }
-    100% { box-shadow: 0 0 22px 6px rgba(0,255,116,0); }
+  @keyframes dealIn {
+    0%   { opacity: 0; transform: translateY(18px) scale(0.9); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
   }
-  @keyframes shakeX {
-    10%, 90% { transform: translateX(-2px) rotateY(180deg); }
-    20%, 80% { transform: translateX(3px) rotateY(180deg); }
-    30%, 50%, 70% { transform: translateX(-6px) rotateY(180deg); }
-    40%, 60% { transform: translateX(6px) rotateY(180deg); }
+  @keyframes matchRing {
+    0%   { box-shadow: 0 0 0 0 rgba(0,255,116,0.75), 0 10px 30px rgba(0,0,0,0.6); }
+    100% { box-shadow: 0 0 0 16px rgba(0,255,116,0), 0 10px 30px rgba(0,0,0,0.6); }
   }
-  @keyframes winPop {
-    0% { opacity: 0; transform: scale(0.6); }
-    60% { opacity: 1; transform: scale(1.1); }
-    100% { transform: scale(1); }
+  @keyframes missShake {
+    10%, 90% { transform: rotateY(180deg) translateX(-2px); }
+    20%, 80% { transform: rotateY(180deg) translateX(4px); }
+    30%, 50%, 70% { transform: rotateY(180deg) translateX(-7px); }
+    40%, 60% { transform: rotateY(180deg) translateX(7px); }
+  }
+  @keyframes statPop {
+    0% { transform: scale(1); } 45% { transform: scale(1.18); } 100% { transform: scale(1); }
+  }
+  @keyframes overlayIn {
+    0%   { opacity: 0; transform: translateY(20px) scale(0.94); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
   }
   @keyframes confettiFall {
-    0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(420px) rotate(540deg); opacity: 0; }
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
   }
+
   html, body {
-    margin: 0; padding: 0; min-height: 100vh;
+    margin: 0; padding: 0; min-height: 100%;
+    background: var(--bg); color: var(--ink);
+    font-family: 'Roboto Mono', monospace;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; inset: -20%; z-index: 0; pointer-events: none;
     background:
-      radial-gradient(circle at 15% 15%, rgba(0,255,116,0.18), transparent 45%),
-      radial-gradient(circle at 85% 85%, rgba(255,51,167,0.22), transparent 45%),
-      linear-gradient(120deg, #000000, #0d0518, #000000);
-    background-size: 200% 200%;
-    animation: bgPulse 14s ease infinite;
-    color: var(--ink); font-family: 'Roboto Mono', monospace;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
+      radial-gradient(ellipse 55% 45% at 18% 12%, rgba(106,0,224,0.55), transparent 62%),
+      radial-gradient(ellipse 50% 40% at 84% 82%, rgba(255,51,167,0.4), transparent 62%),
+      radial-gradient(ellipse 45% 35% at 62% 38%, rgba(0,255,116,0.14), transparent 62%);
+    animation: drift 20s ease-in-out infinite alternate;
   }
-  .wrap { position: relative; max-width: 420px; width: 100%; margin: 20px; text-align: center; }
-  h1 { font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 22px; color: var(--gold); margin: 0 0 6px; letter-spacing: 1px; animation: titleGlow 3s ease-in-out infinite; }
-  .status { font-size: 17px; color: var(--ink-dim); margin-bottom: 16px; transition: color 0.15s, transform 0.15s; }
-  .status.bump { color: var(--accent-light); transform: scale(1.08); }
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(169,81,237,0.10) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(169,81,237,0.10) 1px, transparent 1px),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.28) 0 1px, transparent 1px 3px);
+    background-size: 46px 46px, 46px 46px, 100% 3px;
+    -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 82%);
+    mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 82%);
+  }
+
+  .stage {
+    position: relative; z-index: 2;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 58px 20px 28px; gap: 18px;
+  }
+  .shell { width: 100%; max-width: 560px; }
+
+  .topline { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+  h1 {
+    margin: 0; font-size: clamp(24px, 6vw, 36px); font-weight: 700; letter-spacing: 0.06em; line-height: 1;
+    background: linear-gradient(170deg, #ffffff 8%, var(--pink) 62%, var(--violet-light) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: titleShine 3.4s ease-in-out infinite;
+  }
+  .eyebrow { font-size: 10px; letter-spacing: 0.34em; color: var(--violet-light); margin: 0 0 8px; text-transform: uppercase; }
+
+  .stats { display: flex; gap: 8px; }
+  .stat {
+    min-width: 62px; padding: 8px 11px; border-radius: 11px; text-align: center;
+    background: linear-gradient(160deg, rgba(169,81,237,0.20), rgba(10,8,18,0.86));
+    border: 1px solid rgba(169,81,237,0.34);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 6px 18px rgba(0,0,0,0.5);
+  }
+  .stat .k { display: block; font-size: 8.5px; letter-spacing: 0.2em; color: var(--ink-dim); margin-bottom: 4px; }
+  .stat .v { display: block; font-size: 17px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .stat.hit .v { animation: statPop 0.3s ease; color: var(--green); }
+
+  .track { height: 5px; border-radius: 99px; background: rgba(255,255,255,0.09); overflow: hidden; margin-bottom: 20px; }
+  .track i {
+    display: block; height: 100%; width: 0%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--violet), var(--violet-light), var(--pink), var(--green));
+    box-shadow: 0 0 14px rgba(255,51,167,0.75);
+    transition: width 0.45s cubic-bezier(.3,1.2,.4,1);
+  }
+
+  /* The board is square, so cap it by the vertical room left after the
+     header/track/hint — keeps all 4 rows visible inside a 600px-tall iframe. */
   .board {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px;
+    width: min(100%, calc(100vh - 236px)); margin: 0 auto;
   }
-  .card { aspect-ratio: 1; perspective: 700px; cursor: pointer; user-select: none; }
+  .card { aspect-ratio: 1; perspective: 900px; cursor: pointer; animation: dealIn 0.4s backwards cubic-bezier(.25,1.3,.4,1); }
   .card.matched { cursor: default; }
-  .card-inner {
-    position: relative; width: 100%; height: 100%;
-    transition: transform 0.45s cubic-bezier(.3,1.4,.4,1);
-    transform-style: preserve-3d;
+  .inner {
+    position: relative; width: 100%; height: 100%; border-radius: 14px;
+    transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(.3,1.35,.4,1);
   }
-  .card.flipped .card-inner, .card.matched .card-inner { transform: rotateY(180deg); }
-  .card.shake .card-inner { animation: shakeX 0.4s ease; }
-  .card-back, .card-face {
-    position: absolute; inset: 0; backface-visibility: hidden;
+  .card.flipped .inner, .card.matched .inner { transform: rotateY(180deg); }
+  .card.miss .inner { animation: missShake 0.42s ease; }
+  .face {
+    position: absolute; inset: 0; border-radius: 14px;
     display: flex; align-items: center; justify-content: center;
-    border: 3px solid var(--ink); box-shadow: 3px 3px 0 #000; font-size: 26px;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
   }
-  .card-back { background: var(--panel-light); color: var(--accent-light); transition: box-shadow 0.15s, border-color 0.15s; }
-  .card:not(.flipped):not(.matched):hover .card-back { border-color: var(--accent-light); box-shadow: 4px 4px 0 #000, 0 0 10px 1px rgba(169,81,237,0.6); }
-  .card-face { background: var(--panel); transform: rotateY(180deg); }
-  .card.matched .card-face { border-color: var(--teal); animation: matchPulse 0.6s ease; }
-  .win-msg {
-    margin-top: 18px; font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 16px; color: var(--teal);
-    min-height: 20px; text-shadow: 0 0 12px rgba(0,255,116,0.7);
+  .back {
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.16), transparent 55%),
+      linear-gradient(150deg, var(--violet) 0%, #3d0090 55%, #16003a 100%);
+    border: 1px solid rgba(169,81,237,0.75);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 8px 22px rgba(0,0,0,0.62);
+    color: rgba(255,255,255,0.9); font-size: 20px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
-  .win-msg:not(:empty) { animation: winPop 0.4s cubic-bezier(.2,1.4,.4,1); }
-  .restart-btn {
-    margin-top: 14px; padding: 10px 20px; background: var(--accent); color: #fff; border: 3px solid var(--ink);
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 13px; cursor: pointer;
-    box-shadow: 3px 3px 0 #000, 0 0 12px 1px rgba(106,0,224,0.7); display: none;
+  .back::after {
+    content: ''; position: absolute; inset: 7px; border-radius: 9px;
+    border: 1px dashed rgba(255,255,255,0.22);
   }
-  .restart-btn:hover { background: var(--accent-light); }
-  .restart-btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 #000; }
-  .confetti-piece { position: absolute; top: 0; width: 8px; height: 8px; pointer-events: none; animation: confettiFall 1.5s ease-in forwards; z-index: 5; }
+  .card:not(.flipped):not(.matched):hover .back {
+    transform: translateY(-4px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 14px 30px rgba(106,0,224,0.6), 0 0 22px rgba(169,81,237,0.7);
+  }
+  .front {
+    transform: rotateY(180deg); font-size: clamp(24px, 7vw, 34px);
+    background: linear-gradient(160deg, rgba(255,255,255,0.14), rgba(8,6,16,0.94));
+    border: 1px solid rgba(255,255,255,0.24);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 8px 22px rgba(0,0,0,0.6);
+  }
+  .card.matched .front {
+    border-color: var(--green);
+    background: linear-gradient(160deg, rgba(0,255,116,0.24), rgba(8,6,16,0.94));
+    animation: matchRing 0.75s ease;
+  }
+
+  .hint { margin: 16px 0 0; text-align: center; font-size: 11.5px; letter-spacing: 0.16em; color: var(--ink-dim); }
+
+  .win {
+    position: fixed; inset: 0; z-index: 30; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    background: radial-gradient(ellipse at center, rgba(20,4,40,0.86), rgba(3,2,8,0.96));
+    backdrop-filter: blur(6px);
+  }
+  .win.open { display: flex; }
+  .win-card {
+    width: 100%; max-width: 330px; text-align: center; padding: 30px 26px 26px; border-radius: 20px;
+    background: linear-gradient(165deg, rgba(169,81,237,0.26), rgba(10,8,18,0.96));
+    border: 1px solid rgba(169,81,237,0.5);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 26px 70px rgba(0,0,0,0.7), 0 0 50px rgba(255,51,167,0.28);
+    animation: overlayIn 0.42s cubic-bezier(.25,1.3,.4,1);
+  }
+  .win-card h2 {
+    margin: 0 0 4px; font-size: 26px; letter-spacing: 0.05em;
+    background: linear-gradient(170deg, #fff, var(--green));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .win-card .sub { margin: 0 0 18px; font-size: 12.5px; color: var(--ink-dim); letter-spacing: 0.08em; }
+  .win-stats { display: flex; gap: 9px; justify-content: center; margin-bottom: 22px; }
+
+  .btn {
+    width: 100%; padding: 14px; border-radius: 12px; cursor: pointer;
+    font-family: inherit; font-weight: 700; font-size: 12px; letter-spacing: 0.16em; color: #fff;
+    background: linear-gradient(150deg, var(--violet-light), var(--violet) 60%, #45009c);
+    border: 1px solid rgba(255,255,255,0.26);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.32), 0 12px 30px rgba(106,0,224,0.55);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+  }
+  .btn:hover { transform: translateY(-2px); filter: brightness(1.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 16px 38px rgba(106,0,224,0.7); }
+  .btn:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 6px 16px rgba(106,0,224,0.5); }
+
+  .confetti { position: fixed; top: -20px; width: 9px; height: 9px; z-index: 40; pointer-events: none; animation: confettiFall 2s ease-in forwards; }
+
+  @media (max-width: 420px) { .board { gap: 8px; } .stat { min-width: 54px; padding: 7px 8px; } }
 </style>
 </head>
 <body>
-<div class="wrap" id="wrap">
-  <h1>MERK-PAARE</h1>
-  <p class="status" id="status">Züge: 0</p>
-  <div class="board" id="board"></div>
-  <p class="win-msg" id="win-msg"></p>
-  <button class="restart-btn" id="restart-btn">NOCHMAL SPIELEN</button>
+<div class="stage">
+  <div class="shell">
+    <div class="topline">
+      <div>
+        <p class="eyebrow">Digital Sparks</p>
+        <h1>MERK-PAARE</h1>
+      </div>
+      <div class="stats">
+        <div class="stat" id="s-moves"><span class="k">ZÜGE</span><span class="v" id="v-moves">0</span></div>
+        <div class="stat" id="s-pairs"><span class="k">PAARE</span><span class="v" id="v-pairs">0/8</span></div>
+        <div class="stat" id="s-time"><span class="k">ZEIT</span><span class="v" id="v-time">0:00</span></div>
+      </div>
+    </div>
+
+    <div class="track"><i id="bar"></i></div>
+    <div class="board" id="board"></div>
+    <p class="hint">FINDE ALLE 8 PAARE · JE WENIGER ZÜGE, DESTO BESSER</p>
+  </div>
 </div>
+
+<div class="win" id="win">
+  <div class="win-card">
+    <h2>GESCHAFFT!</h2>
+    <p class="sub" id="win-sub">Alle Paare gefunden</p>
+    <div class="win-stats">
+      <div class="stat"><span class="k">ZÜGE</span><span class="v" id="w-moves">0</span></div>
+      <div class="stat"><span class="k">ZEIT</span><span class="v" id="w-time">0:00</span></div>
+      <div class="stat"><span class="k">RANG</span><span class="v" id="w-rank">A</span></div>
+    </div>
+    <button class="btn" id="again">NOCHMAL SPIELEN</button>
+  </div>
+</div>
+
 <script>
 (function(){
+  "use strict";
   const icons = ['🌍','💧','☀️','🌱','♻️','🔋','🚲','🌬️'];
-  let deck = [], flipped = [], matchedCount = 0, moves = 0, lock = false;
-  const wrap = document.getElementById('wrap');
+  const board = document.getElementById('board');
+  const vMoves = document.getElementById('v-moves');
+  const vPairs = document.getElementById('v-pairs');
+  const vTime  = document.getElementById('v-time');
+  const sMoves = document.getElementById('s-moves');
+  const sPairs = document.getElementById('s-pairs');
+  const bar    = document.getElementById('bar');
+  const win    = document.getElementById('win');
+
+  let deck = [], flipped = [], matched = 0, moves = 0, lock = false;
+  let startTime = null, timerId = null;
 
   let actx = null;
-  function beep(freq, dur, type) {
+  function tone(freq, dur, type, vol) {
     try {
       actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-      const osc = actx.createOscillator();
-      const gain = actx.createGain();
-      osc.type = type || 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.15, actx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
-      osc.connect(gain); gain.connect(actx.destination);
-      osc.start(); osc.stop(actx.currentTime + dur);
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol == null ? 0.14 : vol, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(); o.stop(actx.currentTime + dur);
     } catch (e) {}
   }
-  function sfxFlip() { beep(420, 0.08, 'square'); }
-  function sfxMatch() { beep(660, 0.12, 'square'); setTimeout(() => beep(880, 0.16, 'square'), 90); }
-  function sfxMiss() { beep(160, 0.22, 'sawtooth'); }
-  function sfxWin() { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'square'), i * 100)); }
+  const sFlip  = () => tone(430, 0.07, 'square', 0.09);
+  const sMatch = () => { tone(680, 0.11, 'square'); setTimeout(() => tone(920, 0.15, 'square'), 85); };
+  const sMiss  = () => tone(150, 0.2, 'sawtooth', 0.1);
+  const sWin   = () => [523,659,784,1046,1318].forEach((f,i) => setTimeout(() => tone(f, 0.2, 'square'), i*95));
 
-  const confettiColors = ['#ff33a7', '#a951ed', '#00ff74', '#6a00e0', '#f9f9f9'];
-  function burstConfetti(count) {
-    for (let i = 0; i < count; i++) {
-      const piece = document.createElement('div');
-      piece.className = 'confetti-piece';
-      piece.style.left = Math.random() * 100 + '%';
-      piece.style.background = confettiColors[i % confettiColors.length];
-      piece.style.animationDelay = (Math.random() * 0.25) + 's';
-      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-      wrap.appendChild(piece);
-      setTimeout(() => piece.remove(), 1800);
+  const cc = ['#ff33a7','#a951ed','#00ff74','#6a00e0','#ffffff'];
+  function confetti(n) {
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti';
+      p.style.left = Math.random()*100 + 'vw';
+      p.style.background = cc[i % cc.length];
+      p.style.animationDelay = (Math.random()*0.4) + 's';
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 2500);
     }
   }
 
-  function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
+  const shuffle = (a) => { a = [...a]; for (let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+  const fmt = (s) => Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
 
-  const board = document.getElementById('board');
-  const statusEl = document.getElementById('status');
-  const winMsg = document.getElementById('win-msg');
-  const restartBtn = document.getElementById('restart-btn');
+  function pop(el) { el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); }
+
+  function tick() {
+    if (!startTime) return;
+    vTime.textContent = fmt(Math.floor((Date.now() - startTime)/1000));
+  }
 
   function init() {
     deck = shuffle([...icons, ...icons]);
-    flipped = []; matchedCount = 0; moves = 0; lock = false;
-    winMsg.textContent = ''; restartBtn.style.display = 'none';
-    statusEl.textContent = 'Züge: 0';
+    flipped = []; matched = 0; moves = 0; lock = false;
+    startTime = null; clearInterval(timerId); timerId = null;
+    vMoves.textContent = '0'; vPairs.textContent = '0/8'; vTime.textContent = '0:00';
+    bar.style.width = '0%';
+    win.classList.remove('open');
     board.innerHTML = '';
     deck.forEach((icon, i) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.dataset.icon = icon;
-      card.dataset.index = i;
-      card.innerHTML = `
-        <div class="card-inner">
-          <div class="card-back">?</div>
-          <div class="card-face">${icon}</div>
-        </div>`;
-      card.addEventListener('click', () => flip(card));
-      board.appendChild(card);
+      const c = document.createElement('div');
+      c.className = 'card';
+      c.dataset.icon = icon;
+      c.style.animationDelay = (i * 0.035) + 's';
+      c.innerHTML = '<div class="inner"><div class="face back">✦</div><div class="face front">' + icon + '</div></div>';
+      c.addEventListener('click', () => flip(c));
+      board.appendChild(c);
     });
-  }
-
-  function bumpStatus() {
-    statusEl.classList.add('bump');
-    setTimeout(() => statusEl.classList.remove('bump'), 200);
   }
 
   function flip(card) {
     if (lock || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+    if (!startTime) { startTime = Date.now(); timerId = setInterval(tick, 1000); }
     card.classList.add('flipped');
-    sfxFlip();
+    sFlip();
     flipped.push(card);
-    if (flipped.length === 2) {
-      moves++;
-      statusEl.textContent = `Züge: ${moves}`;
-      bumpStatus();
-      lock = true;
-      const [a, b] = flipped;
-      if (a.dataset.icon === b.dataset.icon) {
-        setTimeout(() => {
-          a.classList.add('matched'); b.classList.add('matched');
-          sfxMatch();
-          matchedCount++;
-          flipped = []; lock = false;
-          if (matchedCount === icons.length) {
-            winMsg.textContent = `GESCHAFFT IN ${moves} ZÜGEN!`;
-            restartBtn.style.display = 'inline-block';
-            sfxWin();
-            burstConfetti(28);
-          }
-        }, 250);
-      } else {
-        setTimeout(() => { a.classList.add('shake'); b.classList.add('shake'); sfxMiss(); }, 250);
-        setTimeout(() => {
-          a.classList.remove('flipped', 'shake'); b.classList.remove('flipped', 'shake');
-          flipped = []; lock = false;
-        }, 900);
-      }
+    if (flipped.length < 2) return;
+
+    moves++; vMoves.textContent = moves; pop(sMoves);
+    lock = true;
+    const [a, b] = flipped;
+
+    if (a.dataset.icon === b.dataset.icon) {
+      setTimeout(() => {
+        a.classList.add('matched'); b.classList.add('matched');
+        matched++;
+        vPairs.textContent = matched + '/8'; pop(sPairs);
+        bar.style.width = (matched / icons.length * 100) + '%';
+        sMatch();
+        flipped = []; lock = false;
+        if (matched === icons.length) finish();
+      }, 260);
+    } else {
+      setTimeout(() => { a.classList.add('miss'); b.classList.add('miss'); sMiss(); }, 240);
+      setTimeout(() => {
+        a.classList.remove('flipped','miss'); b.classList.remove('flipped','miss');
+        flipped = []; lock = false;
+      }, 920);
     }
   }
 
-  restartBtn.addEventListener('click', init);
+  function finish() {
+    clearInterval(timerId);
+    const secs = Math.floor((Date.now() - startTime)/1000);
+    const rank = moves <= 12 ? 'S' : moves <= 16 ? 'A' : moves <= 22 ? 'B' : 'C';
+    document.getElementById('w-moves').textContent = moves;
+    document.getElementById('w-time').textContent = fmt(secs);
+    document.getElementById('w-rank').textContent = rank;
+    document.getElementById('win-sub').textContent =
+      rank === 'S' ? 'Makelloses Gedächtnis!' : rank === 'A' ? 'Stark gespielt!' : 'Alle Paare gefunden';
+    setTimeout(() => { win.classList.add('open'); sWin(); confetti(40); }, 480);
+  }
+
+  document.getElementById('again').addEventListener('click', init);
   init();
 })();
 </script>
+
 <button id="fs-toggle-btn" type="button" aria-label="Vollbild umschalten">⛶ MAXIMIEREN</button>
 <style>
   #fs-toggle-btn {
-    position: fixed; top: 10px; right: 10px; z-index: 9999;
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 11px; line-height: 1;
-    padding: 9px 11px; background: #171a1a; color: #a951ed;
-    border: 2px solid #a951ed; box-shadow: 3px 3px 0 #000; cursor: pointer;
-    white-space: nowrap;
+    position: fixed; top: 14px; right: 14px; z-index: 9999;
+    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 10px; letter-spacing: 0.12em; line-height: 1;
+    padding: 10px 13px; border-radius: 9px; cursor: pointer; white-space: nowrap;
+    color: #ecd9ff;
+    background: linear-gradient(150deg, rgba(106,0,224,0.9), rgba(60,0,130,0.92));
+    border: 1px solid rgba(169,81,237,0.75);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 8px 22px rgba(106,0,224,0.5);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
   }
-  #fs-toggle-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #000; }
+  #fs-toggle-btn:hover { transform: translateY(-2px); filter: brightness(1.18); box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 12px 28px rgba(106,0,224,0.68); }
+  #fs-toggle-btn:active { transform: translateY(1px); }
   #fs-toggle-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 </style>
 <script>

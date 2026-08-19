@@ -7,40 +7,85 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  @keyframes hudGlow {
-    0%, 100% { text-shadow: 2px 2px 0 rgba(0,0,0,0.6), 0 0 10px rgba(255,51,167,0.6); }
-    50% { text-shadow: 2px 2px 0 rgba(0,0,0,0.6), 0 0 18px rgba(255,51,167,1); }
+  :root {
+    --ink: #f9f9f9; --ink-dim: #9a9aa6;
+    --violet: #6a00e0; --violet-light: #a951ed;
+    --pink: #ff33a7; --green: #00ff74;
   }
+  * { box-sizing: border-box; }
+
+  @keyframes titleShine {
+    0%, 100% { filter: drop-shadow(0 0 14px rgba(255,51,167,0.5)); }
+    50%      { filter: drop-shadow(0 0 28px rgba(255,51,167,0.9)); }
+  }
+  @keyframes statPop { 0% { transform: scale(1); } 45% { transform: scale(1.16); } 100% { transform: scale(1); } }
+  @keyframes hintPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+
   html, body {
-    margin: 0; padding: 0; overflow: hidden; background: #04101c;
-    font-family: 'Roboto Mono', monospace; color: #e7f4ff;
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    background: #03060f; color: var(--ink); font-family: 'Roboto Mono', monospace;
   }
-  #scene { position: fixed; inset: 0; cursor: pointer; }
-  .hud {
-    position: fixed; top: 14px; left: 14px; z-index: 5;
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 16px; color: #ff33a7;
-    animation: hudGlow 2.4s ease-in-out infinite; letter-spacing: 1px;
+  #scene { position: fixed; inset: 0; cursor: grab; }
+  #scene:active { cursor: grabbing; }
+  /* vignette + scanlines sell the "screen" feel over the WebGL canvas */
+  .grade {
+    position: fixed; inset: 0; z-index: 3; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.14) 0 1px, transparent 1px 3px);
+    box-shadow: inset 0 0 180px rgba(0,0,0,0.85), inset 0 0 60px rgba(106,0,224,0.22);
   }
-  .wind-wrap {
-    position: fixed; top: 44px; left: 14px; z-index: 5; width: 160px;
+
+  .hud { position: fixed; top: 16px; left: 16px; z-index: 5; }
+  .eyebrow { font-size: 9px; letter-spacing: 0.34em; color: var(--violet-light); margin: 0 0 6px; text-transform: uppercase; }
+  h1 {
+    margin: 0 0 12px; font-size: clamp(19px, 4vw, 26px); font-weight: 700; letter-spacing: 0.06em; line-height: 1;
+    background: linear-gradient(170deg, #ffffff 6%, var(--pink) 60%, var(--violet-light) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: titleShine 3.2s ease-in-out infinite;
   }
-  .wind-label { font-size: 11px; color: #a951ed; margin-bottom: 4px; text-shadow: 1px 1px 0 rgba(0,0,0,0.6); }
-  .wind-track { height: 8px; background: rgba(255,255,255,0.12); border: 2px solid #e7f4ff; }
-  .wind-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #6a00e0, #a951ed, #ff33a7); transition: width 0.15s linear; box-shadow: 0 0 8px 1px rgba(255,51,167,0.7); }
+
+  .gauge {
+    width: 176px; padding: 10px 12px; border-radius: 12px;
+    background: linear-gradient(160deg, rgba(169,81,237,0.24), rgba(6,8,20,0.86));
+    border: 1px solid rgba(169,81,237,0.4);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 26px rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+  }
+  .gauge .row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+  .gauge .k { font-size: 8.5px; letter-spacing: 0.22em; color: var(--ink-dim); }
+  .gauge .v { font-size: 13px; font-weight: 700; color: var(--green); font-variant-numeric: tabular-nums; }
+  .gauge .v.pop { animation: statPop 0.3s ease; }
+  .track { height: 7px; border-radius: 99px; background: rgba(255,255,255,0.1); overflow: hidden; }
+  .track i {
+    display: block; height: 100%; width: 0%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--violet), var(--violet-light), var(--pink), var(--green));
+    box-shadow: 0 0 12px rgba(255,51,167,0.85); transition: width 0.1s linear;
+  }
+
   .hint {
-    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
-    font-size: 17px; color: #9fd6ff; z-index: 5; text-align: center;
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 5;
+    display: flex; align-items: center; gap: 9px; padding: 10px 16px; border-radius: 99px;
+    font-size: 11.5px; letter-spacing: 0.1em; color: #cfe6ff; white-space: nowrap;
+    background: rgba(6,8,20,0.66); border: 1px solid rgba(169,81,237,0.34);
+    backdrop-filter: blur(8px); animation: hintPulse 3s ease-in-out infinite;
   }
+  .hint b { color: var(--pink); font-weight: 700; }
+  @media (max-width: 520px) { .hint { font-size: 10px; padding: 8px 12px; gap: 6px; } }
 </style>
 </head>
 <body>
 <div id="scene"></div>
-<div class="hud">SEGEL-VORSCHAU</div>
-<div class="wind-wrap">
-  <div class="wind-label">WIND</div>
-  <div class="wind-track"><div class="wind-fill" id="wind-fill"></div></div>
+<div class="grade"></div>
+
+<div class="hud">
+  <p class="eyebrow">Segel-Simulation</p>
+  <h1>SEGEL-VORSCHAU</h1>
+  <div class="gauge">
+    <div class="row"><span class="k">WIND</span><span class="v" id="v-wind">0%</span></div>
+    <div class="track"><i id="wind-bar"></i></div>
+  </div>
 </div>
-<p class="hint">Ziehen, um die Ansicht zu drehen &middot; Tippen, um Segel zu hissen</p>
+
+<p class="hint">ZIEHEN = DREHEN &nbsp;·&nbsp; <b>TIPPEN = SEGEL HISSEN</b></p>
 
 <script type="importmap">
 {
@@ -53,246 +98,315 @@
 import * as THREE from 'three';
 
 const container = document.getElementById('scene');
-const windFill = document.getElementById('wind-fill');
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a2540);
-scene.fog = new THREE.Fog(0x0a2540, 10, 40);
+const windBar = document.getElementById('wind-bar');
+const vWind   = document.getElementById('v-wind');
 
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(0, 4, 10);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x04070f);
+scene.fog = new THREE.FogExp2(0x0a0a24, 0.017);
+
+const camera = new THREE.PerspectiveCamera(52, innerWidth / innerHeight, 0.1, 220);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
 container.appendChild(renderer.domElement);
 
+/* ---------- audio ---------- */
 let actx = null;
-function beep(freq, dur, type, vol) {
+function sweep(from, to, dur, type, vol) {
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    const osc = actx.createOscillator();
-    const gain = actx.createGain();
-    osc.type = type || 'sine';
-    osc.frequency.setValueAtTime(freq, actx.currentTime);
-    gain.gain.setValueAtTime(vol || 0.12, actx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
-    osc.connect(gain); gain.connect(actx.destination);
-    osc.start(); osc.stop(actx.currentTime + dur);
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(from, actx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(to, actx.currentTime + dur);
+    g.gain.setValueAtTime(vol, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + dur);
   } catch (e) {}
 }
-function sfxBoost() {
-  try {
-    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    const osc = actx.createOscillator();
-    const gain = actx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(180, actx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(520, actx.currentTime + 0.35);
-    gain.gain.setValueAtTime(0.1, actx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.4);
-    osc.connect(gain); gain.connect(actx.destination);
-    osc.start(); osc.stop(actx.currentTime + 0.4);
-  } catch (e) {}
+const sBoost = () => { sweep(180, 620, 0.42, 'sawtooth', 0.09); sweep(90, 300, 0.5, 'sine', 0.06); };
+
+/* ---------- lighting ---------- */
+// Keep ambient low and the key light raking — flat-shaded wave facets only
+// read as waves when a directional source gives them contrast.
+scene.add(new THREE.HemisphereLight(0x6f8fd0, 0x1a0a38, 0.42));
+const moon = new THREE.DirectionalLight(0xdce8ff, 3.1);
+moon.position.set(-9, 4.5, 6);
+scene.add(moon);
+const rimPink = new THREE.PointLight(0xff33a7, 34, 26);
+rimPink.position.set(4.5, 2.6, -3.5);
+scene.add(rimPink);
+const rimViolet = new THREE.PointLight(0x6a00e0, 38, 26);
+rimViolet.position.set(-5, 3.2, 3.5);
+scene.add(rimViolet);
+const sailLight = new THREE.PointLight(0xff33a7, 0, 12);
+sailLight.position.set(0, 2.4, 0);
+scene.add(sailLight);
+// sits just off the boat so the hull never falls into flat silhouette
+const fill = new THREE.PointLight(0xbcd4ff, 26, 14);
+fill.position.set(2.4, 3.6, 2.4);
+scene.add(fill);
+
+/* ---------- starfield ---------- */
+const starGeo = new THREE.BufferGeometry();
+const starN = 700, starPos = new Float32Array(starN * 3);
+for (let i = 0; i < starN; i++) {
+  const r = 70 + Math.random() * 60;
+  const th = Math.random() * Math.PI * 2;
+  const ph = Math.random() * Math.PI * 0.42;
+  starPos[i*3]     = Math.cos(th) * Math.cos(ph) * r;
+  starPos[i*3 + 1] = Math.sin(ph) * r + 6;
+  starPos[i*3 + 2] = Math.sin(th) * Math.cos(ph) * r;
 }
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xdfe9ff, size: 0.42, sizeAttenuation: true, transparent: true, opacity: 0.85, depthWrite: false }));
+scene.add(stars);
 
-// Lighting
-const hemi = new THREE.HemisphereLight(0xbfe3ff, 0x0a2540, 1.1);
-scene.add(hemi);
-const sun = new THREE.DirectionalLight(0xffe9b0, 1.2);
-sun.position.set(6, 8, 3);
-scene.add(sun);
-const magicLight = new THREE.PointLight(0xa951ed, 0, 8);
-magicLight.position.set(0, 2.5, 0);
-scene.add(magicLight);
-
-// Ocean plane with animated vertices
-const oceanGeo = new THREE.PlaneGeometry(60, 60, 60, 60);
+/* ---------- ocean ---------- */
+// ~1 unit per facet keeps the flat-shaded wave crests legible
+const SEG = 104;
+const oceanGeo = new THREE.PlaneGeometry(112, 112, SEG, SEG);
 oceanGeo.rotateX(-Math.PI / 2);
-const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1f6fa8, roughness: 0.35, metalness: 0.1, flatShading: true });
+const oceanMat = new THREE.MeshStandardMaterial({
+  color: 0x2358a8, roughness: 0.5, metalness: 0.2, flatShading: true,
+  emissive: 0x2a0b5a, emissiveIntensity: 0.4
+});
 const ocean = new THREE.Mesh(oceanGeo, oceanMat);
 scene.add(ocean);
-const oceanPos = oceanGeo.attributes.position;
-const basePositions = Float32Array.from(oceanPos.array);
+const oPos = oceanGeo.attributes.position;
+const oBase = Float32Array.from(oPos.array);
 
-// Sparkling water glints (brand-colored points)
-const sparkleCount = 260;
-const sparkleGeo = new THREE.BufferGeometry();
-const sparklePos = new Float32Array(sparkleCount * 3);
-for (let i = 0; i < sparkleCount; i++) {
-  sparklePos[i * 3] = (Math.random() - 0.5) * 50;
-  sparklePos[i * 3 + 1] = 0.15;
-  sparklePos[i * 3 + 2] = (Math.random() - 0.5) * 50;
+// glinting points riding just above the surface
+const glintN = 420;
+const glintGeo = new THREE.BufferGeometry();
+const glintPos = new Float32Array(glintN * 3);
+const glintCol = new Float32Array(glintN * 3);
+const PALETTE = [new THREE.Color(0xa951ed), new THREE.Color(0xff33a7), new THREE.Color(0x00ff74), new THREE.Color(0x4dd8ff)];
+for (let i = 0; i < glintN; i++) {
+  glintPos[i*3]     = (Math.random() - 0.5) * 90;
+  glintPos[i*3 + 1] = 0.2;
+  glintPos[i*3 + 2] = (Math.random() - 0.5) * 90;
+  const c = PALETTE[(Math.random() * PALETTE.length) | 0];
+  glintCol[i*3] = c.r; glintCol[i*3 + 1] = c.g; glintCol[i*3 + 2] = c.b;
 }
-sparkleGeo.setAttribute('position', new THREE.BufferAttribute(sparklePos, 3));
-const sparkleMat = new THREE.PointsMaterial({ color: 0xa951ed, size: 0.11, transparent: true, opacity: 0.7, depthWrite: false });
-const sparkles = new THREE.Points(sparkleGeo, sparkleMat);
-scene.add(sparkles);
-const sparkleHues = [0xa951ed, 0xff33a7, 0x00ff74, 0x6a00e0];
+glintGeo.setAttribute('position', new THREE.BufferAttribute(glintPos, 3));
+glintGeo.setAttribute('color', new THREE.BufferAttribute(glintCol, 3));
+const glintMat = new THREE.PointsMaterial({ size: 0.3, vertexColors: true, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending });
+const glints = new THREE.Points(glintGeo, glintMat);
+scene.add(glints);
 
-// Simple low-poly boat: hull + mast + sail
+const waveAt = (x, z, t) =>
+  Math.sin(x * 0.36 + t) * 0.52 +
+  Math.cos(z * 0.31 + t * 0.8) * 0.42 +
+  Math.sin((x + z) * 0.17 + t * 1.4) * 0.22 +
+  Math.cos((x - z) * 0.52 + t * 1.9) * 0.1;
+
+/* ---------- boat ---------- */
 const boat = new THREE.Group();
 
-const hullGeo = new THREE.CylinderGeometry(0.05, 0.6, 2.6, 8, 1, false);
-hullGeo.rotateZ(Math.PI / 2);
-const hullMat = new THREE.MeshStandardMaterial({ color: 0x8a5a34, roughness: 0.7 });
-const hull = new THREE.Mesh(hullGeo, hullMat);
-hull.position.y = 0.25;
+const hull = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.06, 0.62, 2.8, 9).rotateZ(Math.PI / 2),
+  new THREE.MeshStandardMaterial({ color: 0x2a1a3e, roughness: 0.45, metalness: 0.35, flatShading: true })
+);
+hull.position.y = 0.28;
 boat.add(hull);
 
-const deckGeo = new THREE.BoxGeometry(2.2, 0.15, 0.9);
-const deckMat = new THREE.MeshStandardMaterial({ color: 0xd8c39a, roughness: 0.8 });
-const deck = new THREE.Mesh(deckGeo, deckMat);
-deck.position.y = 0.5;
+const trim = new THREE.Mesh(
+  new THREE.BoxGeometry(2.5, 0.07, 0.08),
+  new THREE.MeshStandardMaterial({ color: 0xff33a7, emissive: 0xff33a7, emissiveIntensity: 2.4 })
+);
+trim.position.set(0, 0.56, 0.44);
+boat.add(trim);
+const trim2 = trim.clone(); trim2.position.z = -0.44; boat.add(trim2);
+
+const deck = new THREE.Mesh(
+  new THREE.BoxGeometry(2.3, 0.16, 0.92),
+  new THREE.MeshStandardMaterial({ color: 0x120a22, roughness: 0.6, metalness: 0.3 })
+);
+deck.position.y = 0.52;
 boat.add(deck);
 
-const mastGeo = new THREE.CylinderGeometry(0.04, 0.04, 2.4, 8);
-const mastMat = new THREE.MeshStandardMaterial({ color: 0x3a2410 });
-const mast = new THREE.Mesh(mastGeo, mastMat);
-mast.position.set(0, 1.7, 0);
+const mast = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.045, 0.045, 2.7, 8),
+  new THREE.MeshStandardMaterial({ color: 0x0e0820, roughness: 0.5, metalness: 0.4 })
+);
+mast.position.set(0, 1.9, 0);
 boat.add(mast);
 
-const sailGeo = new THREE.PlaneGeometry(1.2, 1.7);
 const sailMat = new THREE.MeshStandardMaterial({
-  color: 0xf6f1e4, side: THREE.DoubleSide, roughness: 0.9,
+  color: 0xf2e9ff, side: THREE.DoubleSide, roughness: 0.75, flatShading: true,
   emissive: new THREE.Color(0xff33a7), emissiveIntensity: 0
 });
+const sailGeo = new THREE.PlaneGeometry(1.35, 1.95, 8, 8);
 const sail = new THREE.Mesh(sailGeo, sailMat);
-sail.position.set(0.02, 1.7, 0);
+sail.position.set(0.03, 1.85, 0);
 sail.rotation.y = Math.PI / 2.3;
 boat.add(sail);
+const sBase = Float32Array.from(sailGeo.attributes.position.array);
+
+const jib = new THREE.Mesh(
+  new THREE.PlaneGeometry(0.8, 1.2),
+  new THREE.MeshStandardMaterial({ color: 0xd9c9ff, side: THREE.DoubleSide, roughness: 0.8, emissive: 0x6a00e0, emissiveIntensity: 0.25 })
+);
+jib.position.set(0.02, 1.5, 0);
+jib.rotation.y = Math.PI / 2.3;
+jib.translateX(-0.75);
+boat.add(jib);
 
 scene.add(boat);
 
-// Wake particle trail
-const wakeParticles = [];
-function spawnWake(intensity) {
-  const geo = new THREE.CircleGeometry(0.12 + Math.random() * 0.1 * intensity, 8);
-  const mat = new THREE.MeshBasicMaterial({ color: 0xbfe6ff, transparent: true, opacity: 0.55 * intensity });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.rotation.x = -Math.PI / 2;
-  mesh.position.set(boat.position.x - 1.1, 0.16, boat.position.z);
-  scene.add(mesh);
-  wakeParticles.push({ mesh, life: 0, maxLife: 1.2 });
+/* ---------- wake ---------- */
+const wake = [];
+function spawnWake(strength) {
+  const m = new THREE.Mesh(
+    new THREE.RingGeometry(0.14, 0.2, 18),
+    new THREE.MeshBasicMaterial({ color: 0x9fd8ff, transparent: true, opacity: 0.5 * strength, side: THREE.DoubleSide, depthWrite: false })
+  );
+  m.rotation.x = -Math.PI / 2;
+  m.position.set(-1.3, 0.22, (Math.random() - 0.5) * 0.5);
+  scene.add(m);
+  wake.push({ m, life: 0, max: 1.5 });
 }
 
-// Orbit-ish manual controls (drag to rotate camera around origin)
-let isDragging = false;
-let prevX = 0, prevY = 0, downX = 0, downY = 0, downT = 0;
-let theta = 0.4, phi = 1.15;
-let radius = 10;
-let boost = 0;
+/* ---------- camera / input ---------- */
+let theta = 0.5, phi = 1.12, radius = 11;
+let dragging = false, px = 0, py = 0, downX = 0, downY = 0, downT = 0;
+let boost = 0, autoSpin = true;
 
 function updateCamera() {
-  const r = radius - boost * 0.8;
-  camera.position.x = r * Math.sin(phi) * Math.sin(theta);
-  camera.position.y = r * Math.cos(phi) + 2;
-  camera.position.z = r * Math.sin(phi) * Math.cos(theta);
-  camera.lookAt(0, 0.5, 0);
+  const r = radius - boost * 1.4;
+  camera.position.set(
+    r * Math.sin(phi) * Math.sin(theta),
+    r * Math.cos(phi) + 2.4,
+    r * Math.sin(phi) * Math.cos(theta)
+  );
+  camera.lookAt(0, 0.9, 0);
 }
 updateCamera();
 
-function triggerBoost() {
-  boost = Math.min(1, boost + 0.35);
-  sfxBoost();
-  for (let i = 0; i < 6; i++) spawnWake(1);
-}
-
-renderer.domElement.addEventListener('pointerdown', (e) => {
-  isDragging = true; prevX = e.clientX; prevY = e.clientY;
-  downX = e.clientX; downY = e.clientY; downT = performance.now();
+const el = renderer.domElement;
+el.addEventListener('pointerdown', (e) => {
+  dragging = true; autoSpin = false;
+  px = downX = e.clientX; py = downY = e.clientY; downT = performance.now();
 });
-window.addEventListener('pointerup', (e) => {
-  isDragging = false;
-  const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
-  const dt = performance.now() - downT;
-  if (moved < 6 && dt < 350) triggerBoost();
+addEventListener('pointerup', (e) => {
+  dragging = false;
+  // a short, near-stationary press counts as a tap → boost
+  if (Math.hypot(e.clientX - downX, e.clientY - downY) < 7 && performance.now() - downT < 340) {
+    boost = Math.min(1, boost + 0.42);
+    sBoost();
+    for (let i = 0; i < 7; i++) spawnWake(1);
+  }
 });
-window.addEventListener('pointermove', (e) => {
-  if (!isDragging) return;
-  const dx = e.clientX - prevX;
-  const dy = e.clientY - prevY;
-  theta -= dx * 0.008;
-  phi = Math.min(Math.max(phi - dy * 0.006, 0.5), 1.5);
-  prevX = e.clientX; prevY = e.clientY;
-  updateCamera();
+addEventListener('pointermove', (e) => {
+  if (!dragging) return;
+  theta -= (e.clientX - px) * 0.008;
+  phi = Math.min(Math.max(phi - (e.clientY - py) * 0.006, 0.42), 1.46);
+  px = e.clientX; py = e.clientY;
 });
-
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(innerWidth, innerHeight);
 });
 
+/* ---------- loop ---------- */
 const clock = new THREE.Clock();
-let autoSpin = true;
-renderer.domElement.addEventListener('pointerdown', () => { autoSpin = false; });
+let lastPct = -1;
 
 function animate() {
   requestAnimationFrame(animate);
-  const t = clock.getElapsedTime();
-  const dt = clock.getDelta();
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = clock.elapsedTime;
 
-  boost = Math.max(0, boost - dt * 0.18);
-  windFill.style.width = (boost * 100) + '%';
-  sailMat.emissiveIntensity = boost * 0.9;
-  magicLight.intensity = boost * 1.4;
-
-  const speedMul = 1 + boost * 2.2;
-
-  // animate ocean waves
-  for (let i = 0; i < oceanPos.count; i++) {
-    const x = basePositions[i * 3];
-    const z = basePositions[i * 3 + 2];
-    const y = Math.sin(x * 0.4 + t * speedMul) * 0.18 + Math.cos(z * 0.35 + t * 0.8 * speedMul) * 0.14;
-    oceanPos.setY(i, y);
+  boost = Math.max(0, boost - dt * 0.2);
+  const pct = Math.round(boost * 100);
+  if (pct !== lastPct) {
+    windBar.style.width = pct + '%';
+    vWind.textContent = pct + '%';
+    if (pct > lastPct) { vWind.classList.remove('pop'); void vWind.offsetWidth; vWind.classList.add('pop'); }
+    lastPct = pct;
   }
-  oceanPos.needsUpdate = true;
+  const speed = 1 + boost * 2.4;
+
+  // ocean
+  for (let i = 0; i < oPos.count; i++) {
+    oPos.setY(i, waveAt(oBase[i*3], oBase[i*3 + 2], t * speed));
+  }
+  oPos.needsUpdate = true;
   oceanGeo.computeVertexNormals();
+  oceanMat.emissiveIntensity = 0.38 + boost * 0.5;
 
-  // sparkle shimmer: pulse opacity and cycle hue
-  sparkleMat.opacity = 0.45 + Math.sin(t * 2) * 0.25 + boost * 0.2;
-  const hue = sparkleHues[Math.floor(t * 0.6) % sparkleHues.length];
-  sparkleMat.color.lerp(new THREE.Color(hue), 0.02);
+  // glints ride the waves and shimmer
+  const gp = glintGeo.attributes.position;
+  for (let i = 0; i < glintN; i++) {
+    gp.setY(i, waveAt(gp.getX(i), gp.getZ(i), t * speed) + 0.14);
+  }
+  gp.needsUpdate = true;
+  glintMat.opacity = 0.55 + Math.sin(t * 2.4) * 0.2 + boost * 0.25;
+  glintMat.size = 0.26 + boost * 0.2;
 
-  // bob the boat with the nearest wave approximation
-  boat.position.y = Math.sin(t * speedMul) * 0.18 + Math.cos(t * 0.8 * speedMul) * 0.1;
-  boat.rotation.z = Math.sin(t * 0.7 * speedMul) * 0.05;
-  boat.rotation.x = Math.cos(t * 0.6 * speedMul) * 0.04;
+  // sail billows with the wind
+  const sp = sailGeo.attributes.position;
+  for (let i = 0; i < sp.count; i++) {
+    const x = sBase[i*3], y = sBase[i*3 + 1];
+    const edge = 1 - Math.abs(x) / 0.675;
+    sp.setZ(i, Math.sin(y * 2 + t * 3) * 0.1 * edge * (0.35 + boost * 1.6));
+  }
+  sp.needsUpdate = true;
+  sailGeo.computeVertexNormals();
+  sailMat.emissiveIntensity = boost * 1.5;
+  sailLight.intensity = boost * 4;
 
-  if (boost > 0.05 && Math.random() < boost * 0.6) spawnWake(boost);
-  for (let i = wakeParticles.length - 1; i >= 0; i--) {
-    const p = wakeParticles[i];
-    p.life += dt;
-    const k = p.life / p.maxLife;
-    p.mesh.scale.setScalar(1 + k * 2.2);
-    p.mesh.material.opacity = Math.max(0, 0.55 * (1 - k));
-    if (p.life >= p.maxLife) {
-      scene.remove(p.mesh);
-      p.mesh.geometry.dispose();
-      p.mesh.material.dispose();
-      wakeParticles.splice(i, 1);
+  // boat bob
+  boat.position.y = waveAt(0, 0, t * speed) * 0.85;
+  boat.rotation.z = Math.sin(t * 0.7 * speed) * 0.055;
+  boat.rotation.x = Math.cos(t * 0.6 * speed) * 0.045;
+
+  // wake trail
+  if (boost > 0.04 && Math.random() < boost * 0.75) spawnWake(boost);
+  for (let i = wake.length - 1; i >= 0; i--) {
+    const w = wake[i];
+    w.life += dt;
+    const k = w.life / w.max;
+    w.m.scale.setScalar(1 + k * 5.5);
+    w.m.material.opacity = Math.max(0, 0.5 * (1 - k));
+    if (k >= 1) {
+      scene.remove(w.m); w.m.geometry.dispose(); w.m.material.dispose(); wake.splice(i, 1);
     }
   }
 
-  if (autoSpin) {
-    theta += 0.0022 * speedMul;
-  }
-  updateCamera();
+  // moving rim lights keep the hull reading against the dark water
+  rimPink.position.set(Math.sin(t * 0.5) * 5, 2.6, Math.cos(t * 0.5) * 5);
+  rimViolet.position.set(Math.sin(t * 0.5 + Math.PI) * 5, 3.2, Math.cos(t * 0.5 + Math.PI) * 5);
+  stars.rotation.y += dt * 0.012;
 
+  if (autoSpin) theta += 0.0022 * speed;
+  updateCamera();
   renderer.render(scene, camera);
 }
 animate();
 </script>
+
 <button id="fs-toggle-btn" type="button" aria-label="Vollbild umschalten">⛶ MAXIMIEREN</button>
 <style>
   #fs-toggle-btn {
-    position: fixed; top: 10px; right: 10px; z-index: 9999;
-    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 11px; line-height: 1;
-    padding: 9px 11px; background: #171a1a; color: #a951ed;
-    border: 2px solid #a951ed; box-shadow: 3px 3px 0 #000; cursor: pointer;
-    white-space: nowrap;
+    position: fixed; top: 14px; right: 14px; z-index: 9999;
+    font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 10px; letter-spacing: 0.12em; line-height: 1;
+    padding: 10px 13px; border-radius: 9px; cursor: pointer; white-space: nowrap;
+    color: #ecd9ff;
+    background: linear-gradient(150deg, rgba(106,0,224,0.9), rgba(60,0,130,0.92));
+    border: 1px solid rgba(169,81,237,0.75);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 8px 22px rgba(106,0,224,0.5);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
   }
-  #fs-toggle-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #000; }
+  #fs-toggle-btn:hover { transform: translateY(-2px); filter: brightness(1.18); box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 12px 28px rgba(106,0,224,0.68); }
+  #fs-toggle-btn:active { transform: translateY(1px); }
   #fs-toggle-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 </style>
 <script>
