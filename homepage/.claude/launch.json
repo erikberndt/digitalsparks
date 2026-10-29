@@ -1,0 +1,1 @@
+{"version":"0.0.1","configurations":[{"name":"sparks","runtimeExecutable":"python3","runtimeArgs":["-m","http.server","4388","--directory","."],"port":4388}]}
