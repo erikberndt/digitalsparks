@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Weiter am Tablet (App)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&amp;family=Manrope:wght@500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#000}
+a{color:#C9B6FF}a:hover{color:#E2D8FF}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #000000; color: #FFFFFF; font-family: 'Manrope', 'Helvetica Neue', system-ui, sans-serif; display: flex; flex-direction: column; padding: 0 20px; box-sizing: border-box">
+
+<div style="display: flex; justify-content: center; padding-top: 28px">
+<sc-if value="{{afterSignup}}" hint-placeholder-val="{{ true }}">
+<span style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: #1A1528; color: #E2D8FF; font-size: 14px; font-weight: 700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Dein Konto ist bereit</span>
+</sc-if>
+</div>
+
+<svg aria-hidden="true" width="350" height="250" viewBox="0 0 350 250" style="margin-top: 14px; align-self: center">
+<polygon points="{{burst}}" fill="#FF2BD6"></polygon>
+<g transform="rotate(-8 175 125)">
+<rect x="85" y="62" width="180" height="126" rx="16" fill="#2433E0"></rect>
+<rect x="97" y="74" width="156" height="102" rx="8" fill="#0B1260"></rect>
+<circle cx="258" cy="125" r="3" fill="#0B1260"></circle>
+</g>
+<path d="M232 52l5 13 13 5-13 5-5 13-5-13-13-5 13-5z" fill="#FFFFFF"></path>
+</svg>
+
+<h1 style="margin: 18px 0 0; text-align: center; font-family: 'Newsreader', Georgia, serif; font-weight: 400; font-size: 36px; line-height: 1.1; letter-spacing: -0.01em">Weiter geht’s am Tablet oder Computer</h1>
+<p style="margin: 12px 0 0; text-align: center; font-size: 16px; line-height: 1.5; color: #BDBDBD">Sparks ist für große Bildschirme gemacht. Wir schicken dir den Link – dort öffnen, anmelden, loslegen.</p>
+
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{notSent}}" hint-placeholder-val="{{ true }}">
+<button onClick="{{send}}" style="width: 100%; min-height: 56px; border-radius: 999px; border: none; background: {{accent}}; color: #FFFFFF; font: inherit; font-size: 17px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-10 6L2 7"></path></svg>Link per E-Mail schicken</button>
+</sc-if>
+<sc-if value="{{sent}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="min-height: 56px; border-radius: 999px; background: #1A1528; border: 1px solid {{accent}}; color: #FFFFFF; font-size: 17px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9B6FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Link gesendet</div>
+<span style="text-align: center; font-size: 13px; font-weight: 600; color: #A3A3A3">an erik@education-innovation-lab.de</span>
+</sc-if>
+<button style="min-height: 52px; border-radius: 999px; border: 1px solid #3A3A3A; background: none; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Link kopieren</button>
+</div>
+<a href="F1-Landing.dc.html" style="margin: 14px 0 30px; min-height: 44px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700">Lernreisen am Handy ansehen</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#6E44D9","options":["#6E44D9","#1F6FEB","#C2410C","#0F766E"]},"afterSignup":{"editor":"boolean","default":true},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const pts = [];
+    const n = 26;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      const r = i % 2 === 0 ? 118 : 88 + ((i * 7) % 5) * 4;
+      pts.push((175 + Math.cos(a) * r * 1.25).toFixed(1) + ',' + (125 + Math.sin(a) * r * 0.9).toFixed(1));
+    }
+    const st = this.state || {};
+    const sent = st.sent ?? false;
+    return {
+      accent: this.props.accent ?? '#6E44D9',
+      afterSignup: this.props.afterSignup ?? true,
+      burst: pts.join(' '),
+      sent, notSent: !sent,
+      send: () => this.setState({ sent: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

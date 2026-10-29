@@ -1,0 +1,1248 @@
+<meta charset="utf-8">
+<title>Digital Spark Hub</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Vollbild-3D-Bühne (Canvas), darüber HUD oben (Stufen + Signal), Auswahl-Panel unten, Kino-Overlay in der Ego-Perspektive.
+   Bewusst einheitlich dunkel wie ein Spiel-Auswahlbildschirm – kein Hell-Modus. */
+:root {
+  --night: #0f0d13;
+  --panel: rgba(22, 19, 28, .86);
+  --panel-solid: #1a1720;
+  --line: rgba(255, 255, 255, .14);
+  --ink: #f4eee9;
+  --muted: #b2a8b3;
+  --spark: #f2662f;
+  --spark-2: #ffb938;
+  --link: #2fd3b4;
+  --f-display: "Sora", "Avenir Next", system-ui, sans-serif;
+  --f-body: "DM Sans", system-ui, -apple-system, sans-serif;
+  --f-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --sat: .25;
+  color-scheme: dark;
+}
+:root[data-step="2"] { --sat: .75; }
+:root[data-step="3"] { --sat: 1.1; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--night); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45; overflow: hidden; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--spark-2); outline-offset: 3px; }
+#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; filter: saturate(var(--sat)); transition: filter 1s; touch-action: manipulation; }
+#gl.hover { cursor: pointer; }
+
+/* HUD oben */
+.hud { position: fixed; top: 0; left: 0; right: 0; z-index: 5; display: grid; gap: 10px; pointer-events: none;
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+  transition: opacity .5s, transform .5s; }
+.hud > * { pointer-events: auto; }
+.hud.off { opacity: 0; transform: translateY(-20px); }
+.hud.off > * { pointer-events: none; }
+.hud-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; max-width: 1100px; width: 100%; margin: 0 auto; }
+.brand { font-family: var(--f-display); font-weight: 800; font-size: 20px; letter-spacing: -.02em; margin: 0; }
+.brand span { color: var(--spark); }
+.stepper { display: flex; gap: 6px; flex: 1; min-width: 0; flex-wrap: wrap; }
+.stepper button { border: 1px solid var(--line); background: var(--panel); border-radius: 99px; padding: 6px 12px; font-size: 13px; display: inline-flex; gap: 6px; align-items: baseline; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.stepper button .u { font-family: var(--f-mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.stepper button[aria-current="step"] { border-color: var(--spark-2); background: rgba(255, 185, 56, .14); }
+.stepper button.past .u::after { content: " ✓"; color: var(--link); }
+.signal { display: flex; align-items: center; gap: 10px; min-width: 220px; }
+.signal .lbl { font-family: var(--f-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.track { flex: 1; height: 8px; border-radius: 99px; background: rgba(255,255,255,.1); overflow: hidden; position: relative; min-width: 90px; }
+.fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--spark), var(--spark-2)); border-radius: inherit; transition: width 1s cubic-bezier(.2,.8,.2,1); }
+.track .mark { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--night); }
+.pct { font-family: var(--f-display); font-weight: 700; font-variant-numeric: tabular-nums; min-width: 4ch; text-align: right; }
+.pts { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.pts b { color: var(--ink); font-family: var(--f-display); }
+
+/* Namensschilder über den Figuren */
+#labels { position: fixed; inset: 0; pointer-events: none; z-index: 3; transition: opacity .4s; }
+#labels.off { opacity: 0; }
+.tagl { position: absolute; transform: translate(-50%, -100%); display: grid; justify-items: center; gap: 3px; white-space: nowrap; }
+.tagl .n { font-family: var(--f-display); font-weight: 700; font-size: 15px; text-shadow: 0 2px 10px rgba(0,0,0,.7); }
+.tagl .s { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; background: var(--panel); border: 1px solid var(--line); color: var(--muted); }
+.tagl .s.new { background: var(--spark-2); color: #2a1a00; border-color: transparent; }
+.tagl .s.ok { color: var(--link); }
+.tagl.locked .n { color: var(--muted); font-size: 13px; }
+
+/* Auswahl-Panel unten */
+.dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; display: grid; justify-items: center; gap: 10px;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 18px) max(16px, env(safe-area-inset-left, 0px)); pointer-events: none; }
+.dock > * { pointer-events: auto; }
+.hint { font-family: var(--f-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: center; animation: breathe 2.4s ease-in-out infinite; }
+@keyframes breathe { 50% { opacity: .45; } }
+.sel { width: min(620px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 24px; padding: 18px 20px; display: grid; gap: 10px;
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); animation: up .45s cubic-bezier(.2,.9,.3,1.1) both; }
+@keyframes up { from { opacity: 0; transform: translateY(24px); } }
+.sel .eyebrow { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--spark-2); }
+.sel h2 { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: 30px; letter-spacing: -.02em; line-height: 1.05; }
+.sel q { font-size: 16px; color: var(--ink); quotes: "„" "“"; }
+.mood { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.mood b { color: var(--ink); font-weight: 600; }
+.rx { display: inline-flex; gap: 2px; align-items: flex-end; height: 14px; }
+.rx i { width: 4px; border-radius: 1px; background: rgba(255,255,255,.18); }
+.rx i.on { background: var(--c, var(--spark-2)); }
+.btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.primary { border: 0; background: var(--ink); color: #17131c; font-family: var(--f-display); font-weight: 700; font-size: 16px; border-radius: 99px; padding: 13px 22px; display: inline-flex; align-items: center; gap: 10px; transition: transform .15s, background .2s; }
+.primary:hover { transform: translateY(-2px); background: #fff; }
+.primary .k { width: 22px; height: 22px; border-radius: 50%; background: var(--c, var(--spark)); display: inline-grid; place-items: center; }
+.primary .k svg { width: 10px; height: 10px; fill: #fff; }
+.ghost { border: 1px solid var(--line); background: transparent; border-radius: 99px; padding: 12px 18px; color: var(--muted); }
+.ghost:hover { color: var(--ink); border-color: rgba(255,255,255,.3); }
+.next { border: 0; background: linear-gradient(90deg, var(--spark), var(--spark-2)); color: #23140a; font-family: var(--f-display); font-weight: 800; font-size: 16px; border-radius: 99px; padding: 14px 26px; animation: up .5s both; box-shadow: 0 10px 40px -10px rgba(242, 102, 47, .7); }
+
+/* Kino-Modus */
+.bar { position: fixed; left: 0; right: 0; height: 0; background: #000; z-index: 7; transition: height .7s cubic-bezier(.6,0,.2,1); }
+.bar.t { top: 0; } .bar.b { bottom: 0; }
+body.cine .bar { height: 9vh; }
+#fade { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 9; transition: opacity .45s; }
+#fade.on { opacity: 1; }
+.fp { position: fixed; inset: 0; z-index: 8; pointer-events: none; }
+.fp > * { pointer-events: auto; }
+.fp-tag { position: absolute; top: calc(9vh + 14px); left: max(16px, env(safe-area-inset-left, 0px)); font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; display: flex; gap: 8px; align-items: center; color: var(--muted); }
+.fp-tag .dot { width: 8px; height: 8px; border-radius: 50%; background: #ff3d3d; animation: breathe 1.2s infinite; }
+.fp-ctrl { position: absolute; top: calc(9vh + 8px); right: max(16px, env(safe-area-inset-right, 0px)); display: flex; gap: 8px; }
+.fp-ctrl button { border: 1px solid var(--line); background: var(--panel); border-radius: 99px; padding: 7px 14px; font-size: 13px; }
+.sub { position: absolute; left: 50%; bottom: calc(9vh + 22px); transform: translateX(-50%); width: min(760px, calc(100% - 32px)); text-align: center; pointer-events: none; }
+.sub .who { font-family: var(--f-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--c, var(--spark-2)); }
+.sub .line { font-family: var(--f-display); font-weight: 600; font-size: clamp(18px, 2.6vw, 26px); line-height: 1.3; text-wrap: balance; text-shadow: 0 2px 18px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.8); animation: subIn .4s both; }
+@keyframes subIn { from { opacity: 0; transform: translateY(8px); } }
+.wave { display: inline-flex; gap: 2px; align-items: center; height: 14px; margin-left: 6px; vertical-align: middle; }
+.wave i { width: 3px; height: 100%; background: var(--c, var(--spark-2)); border-radius: 2px; animation: eq .7s ease-in-out infinite alternate; }
+.wave i:nth-child(2) { animation-delay: -.2s; } .wave i:nth-child(3) { animation-delay: -.45s; } .wave i:nth-child(4) { animation-delay: -.1s; }
+.wave.off i { animation: none; transform: scaleY(.25); }
+@keyframes eq { to { transform: scaleY(.25); } }
+.decide { position: absolute; left: 50%; bottom: calc(9vh + 18px); transform: translateX(-50%); width: min(640px, calc(100% - 32px)); display: grid; gap: 10px; animation: up .45s both; }
+.decide .ask { font-family: var(--f-display); font-weight: 700; font-size: 18px; text-align: center; text-shadow: 0 2px 12px rgba(0,0,0,.8); }
+.decide .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .decide .row { grid-template-columns: 1fr; } }
+.choice { border: 1px solid var(--line); background: var(--panel); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-radius: 18px; padding: 14px 16px; text-align: left; display: grid; gap: 2px; font-weight: 600; font-size: 16px; transition: transform .15s, border-color .2s; }
+.choice small { font-weight: 400; color: var(--muted); font-size: 13px; }
+.choice:hover { transform: translateY(-3px); border-color: var(--c, var(--spark-2)); }
+.choice .key { font-family: var(--f-mono); font-size: 11px; color: var(--c, var(--spark-2)); letter-spacing: .08em; }
+.result { position: absolute; left: 50%; bottom: calc(9vh + 18px); transform: translateX(-50%); width: min(560px, calc(100% - 32px)); background: var(--panel); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid var(--line); border-radius: 22px; padding: 16px 18px; display: grid; gap: 10px; animation: up .45s both; }
+.result p { margin: 0; font-size: 15.5px; }
+.plus { font-family: var(--f-display); font-weight: 800; color: var(--link); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.plus .b { display: inline-block; animation: pop .6s cubic-bezier(.2,1.6,.4,1) both; font-size: 20px; }
+@keyframes pop { from { transform: scale(0); } }
+
+/* Feier */
+.cele { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; text-align: center; pointer-events: none;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }
+.cele .inner { display: grid; gap: 12px; justify-items: center; max-width: 520px; pointer-events: auto; animation: up .6s both; }
+.cele .big { font-family: var(--f-display); font-weight: 800; font-size: clamp(80px, 17vw, 160px); line-height: .9; letter-spacing: -.05em; font-variant-numeric: tabular-nums;
+  background: linear-gradient(180deg, #fff, var(--spark-2)); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 8px 30px rgba(242,102,47,.6)); }
+.cele h2 { margin: 0; font-family: var(--f-display); font-size: clamp(22px, 4vw, 32px); text-shadow: 0 2px 16px rgba(0,0,0,.8); }
+.cele p { margin: 0; color: var(--ink); max-width: 42ch; text-shadow: 0 2px 12px rgba(0,0,0,.9); }
+
+.loading { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--f-mono); color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-size: 12px; z-index: 1; }
+@media (max-width: 640px) {
+  .signal { min-width: 0; flex: 1 1 100%; }
+  .sel h2 { font-size: 24px; }
+  .stepper button .t { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+</style>
+
+<div class="loading" id="loading">Bühne wird aufgebaut …</div>
+<canvas id="gl"></canvas>
+<div id="labels"></div>
+
+<header class="hud" id="hud">
+  <div class="hud-row">
+    <h1 class="brand">Digital <span>Spark</span></h1>
+    <nav class="stepper" id="stepper" aria-label="Workshop-Stufe"></nav>
+    <span class="pts" id="pts"></span>
+  </div>
+  <div class="hud-row">
+    <div class="signal">
+      <span class="lbl">Signal</span>
+      <div class="track" role="progressbar" aria-label="Signalstärke der Gruppe" aria-valuemin="0" aria-valuemax="100" id="track"><div class="fill" id="fill"></div><span class="mark"></span></div>
+      <span class="pct" id="pct">0%</span>
+    </div>
+  </div>
+</header>
+
+<div class="dock" id="dock"></div>
+<div class="bar t"></div><div class="bar b"></div>
+<div class="fp" id="fp" hidden></div>
+<div class="cele" id="cele" hidden></div>
+<div id="fade"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* =====================================================================
+   MOCK-DATEN
+   – stages: Unit-Label, Titel, Signalbereich je Stufe
+   – characters: Aussehen (look), Freischaltung (unlock), Platz auf der Bühne (slot),
+     pro Stufe steps[n] mit Vorschau, Stimmung [vorher, nachher], Monolog,
+     Szene (env, Kamera, Statist:innen, beats je Monologzeile) und 2 Choices (mit outcome-beats).
+   Beat-Aktionen: look, camWalk, walk, turn, wave, nod, laugh, camNod, phone, screen, wait.
+   ===================================================================== */
+const L = (x, y, z, d) => ({ a: "look", at: [x, y, z], d });
+const W = (ms) => ({ a: "wait", ms });
+
+const DATA = {
+  moodScale: { 1: "abgeschnitten", 2: "ein Spalt offen", 3: "vorsichtig dabei", 4: "verbunden", 5: "voller Empfang" },
+  stages: {
+    1: { unit: "Unit 1–2", title: "Status quo", signal: [8, 35], next: "Weiter zu Unit 3–4" },
+    2: { unit: "Unit 3–4", title: "Erste Brücken", signal: [50, 75], next: "Weiter zu Unit 5" },
+    3: { unit: "Unit 5", title: "Volle Verbindung", signal: [80, 100], next: null }
+  },
+  characters: [
+    {
+      id: "alex", name: "Alex", role: "Rückzug", unlock: 1, slot: [-3.3, -0.3], pitch: 0.85,
+      look: { color: "#5574f0", skin: "#e0b08a", hair: "#3a2a20", pants: "#2b2f3d", style: "hood" },
+      steps: {
+        1: {
+          preview: "Alle lachen über irgendwas im Chat. Ich hab's nicht mitbekommen.", mood: [1, 2],
+          monologue: ["In der Pause stehen alle in ihren Grüppchen.", "Ich tu so, als würde ich was Wichtiges am Handy checken. Eigentlich scroll ich nur.", "Wenn mich jemand anspricht, weiß ich nicht mal, was ich sagen soll. Also sag ich lieber nichts."],
+          scene: {
+            env: "yard", eye: 1.6, cam: [0, 3], look: [-2, 1.5, -2],
+            npcs: [
+              { id: "a1", at: [-3.6, -2.6], face: [-3, -3] }, { id: "a2", at: [-2.4, -2.6], face: [-3, -3] }, { id: "a3", at: [-3, -3.6], face: [-3, -3] },
+              { id: "b1", at: [2.4, -1.7], face: [3, -2.2] }, { id: "b2", at: [3.5, -2.4], face: [3, -2.2] }
+            ],
+            beats: [
+              [L(-3, 1.5, -3, 1400), { a: "laugh", ids: ["a1", "a2", "a3"] }, W(400), L(3, 1.5, -2, 1800), { a: "laugh", ids: ["b1", "b2"] }],
+              [{ a: "phone", on: true, screen: { type: "feed", title: "Feed" } }, L(0.4, 0.6, -2, 1400)],
+              [{ a: "turn", id: "b1", to: "cam" }, L(2.4, 1.6, -1.7, 1000), W(1200), { a: "turn", id: "b1", to: [3, -2.2] }, L(0.4, 0.6, -2, 1200)]
+            ]
+          },
+          choices: [
+            { label: "Kurz zurücknicken", hint: "wenn jemand rüberschaut", outcome: "Jemand nickt zurück. Kein Gespräch, aber ein kleiner Kontakt. Fühlt sich weniger unsichtbar an.",
+              beats: [{ a: "phone", on: false }, L(2.4, 1.6, -1.7, 1000), { a: "turn", id: "b1", to: "cam" }, W(500), { a: "camNod" }, W(300), { a: "nod", id: "b1" }] },
+            { label: "Mit Emoji reagieren", hint: "auf die letzte Nachricht im Chat", outcome: "Ein Daumen hoch im Gruppenchat. Zwei Leute reagieren darauf. Alex ist wieder ein bisschen sichtbar.",
+              beats: [{ a: "screen", target: "phone", spec: { type: "chat", title: "Klasse 9b", msgs: [{ name: "Ben", text: "wer hat das video gemacht 😂" }, { name: "Lea", text: "legendär" }] } }, W(900),
+                { a: "screen", target: "phone", spec: { type: "chat", title: "Klasse 9b", msgs: [{ name: "Ben", text: "wer hat das video gemacht 😂" }, { name: "Lea", text: "legendär" }, { me: true, text: "👍" }] } }, W(1200),
+                { a: "screen", target: "phone", spec: { type: "chat", title: "Klasse 9b", msgs: [{ name: "Ben", text: "wer hat das video gemacht 😂" }, { name: "Lea", text: "legendär" }, { me: true, text: "👍", react: "❤️ 2" }] } }] }
+          ]
+        },
+        2: {
+          preview: "Sam hat heute was mit einem Stift erzählt. Hm.", mood: [2, 3],
+          monologue: ["Sam hat erzählt, dass er sich einfach einen Stift geliehen hat, um ins Gespräch zu kommen.", "Klingt fast zu simpel.", "Aber vielleicht muss es ja nicht gleich ein ganzes Gespräch sein."],
+          scene: {
+            env: "class", eye: 1.2, cam: [0, 2.6], look: [0, 1.1, -4],
+            npcs: [
+              { id: "sam", char: "sam", at: [0, -1.6], face: [0, -10], sit: true },
+              { id: "n1", at: [2.5, 2.6], face: [2.5, -10], sit: true },
+              { id: "c1", at: [-2.5, 0.4], face: [-2.5, -10], sit: true }, { id: "c2", at: [2.5, 0.4], face: [2.5, -10], sit: true },
+              { id: "c3", at: [-2.5, -1.6], face: [-2.5, -10], sit: true }
+            ],
+            beats: [
+              [L(0, 1.05, -1.6, 1400), { a: "turn", id: "sam", to: "cam" }, W(300), { a: "wave", id: "sam" }],
+              [{ a: "turn", id: "sam", to: [0, -10] }, L(0, 0.3, 1.2, 1400)],
+              [L(2.5, 1.0, 2.6, 1600)]
+            ]
+          },
+          choices: [
+            { label: "Sams Trick testen", hint: "in der nächsten Stunde", outcome: "Alex fragt nach einem Lineal. Kurzer Satz, kurzes Lächeln. Das war's. Und es war okay.",
+              beats: [{ a: "turn", id: "n1", to: "cam" }, W(600), { a: "nod", id: "n1" }, W(300), { a: "camNod" }] },
+            { label: "Sam fragen, wie's lief", hint: "per Nachricht", outcome: "Sam antwortet sofort und schickt ein Lach-Emoji mit. Der Tipp ist bei Alex angekommen.",
+              beats: [{ a: "phone", on: true, screen: { type: "chat", title: "Sam", msgs: [{ me: true, text: "wie lief das mit dem stift?" }] } }, W(1500),
+                { a: "screen", target: "phone", spec: { type: "chat", title: "Sam", msgs: [{ me: true, text: "wie lief das mit dem stift?" }, { name: "Sam", text: "easy 😄 frag einfach was kleines" }] } }] }
+          ]
+        },
+        3: {
+          preview: "Wir sind heute zu dritt zur Bahn gelaufen.", mood: [3, 4],
+          monologue: ["Heute bin ich mit Sam und Mia zur Bahn gelaufen.", "Wir haben über nichts Besonderes geredet.", "Genau das war gut."],
+          scene: {
+            env: "yard", eye: 1.6, cam: [0, 7], look: [0, 1.5, -8],
+            npcs: [
+              { id: "mia", char: "mia", at: [-1.1, 5.8], face: [-1.1, -10] }, { id: "sam", char: "sam", at: [1.2, 5.9], face: [1.2, -10] },
+              { id: "jo", char: "jo", at: [-9, -2], face: [0, 0] }
+            ],
+            beats: [
+              [{ a: "camWalk", to: [0, 3.5], d: 4200, with: ["mia", "sam"] }],
+              [L(-1.1, 1.5, 2.3, 1100), { a: "turn", id: "mia", to: "cam" }, W(300), { a: "laugh", ids: ["mia", "sam"] }],
+              [{ a: "turn", id: "mia", to: [-1.1, -10] }, L(0, 1.7, -8, 1300), { a: "camWalk", to: [0, 1.5], d: 2600, with: ["mia", "sam"] }]
+            ]
+          },
+          choices: [
+            { label: "Morgen wieder zusammen", hint: "gleiche Zeit, gleicher Weg", outcome: "Mia schreibt: „Treffpunkt Ausgang Ost?“ Aus einem Zufall wird eine Gewohnheit.",
+              beats: [L(-1.1, 1.5, 0.3, 900), { a: "turn", id: "mia", to: "cam" }, W(300), { a: "wave", id: "mia" }, { a: "nod", id: "sam" }] },
+            { label: "Jo dazuholen", hint: "Jo fährt dieselbe Linie", outcome: "Jo ist dabei. Die Gruppe ist jetzt zu viert, und Alex hat sie größer gemacht.",
+              beats: [{ a: "walk", id: "jo", to: [-1.8, -1.4], par: true }, L(-3, 1.5, -1.6, 2200), W(1400), { a: "turn", id: "jo", to: "cam" }, W(200), { a: "wave", id: "jo" }, { a: "laugh", ids: ["mia", "sam"] }] }
+          ]
+        }
+      }
+    },
+    {
+      id: "sam", name: "Sam", role: "Lösungsfigur", unlock: 2, slot: [-1.1, 0.25], pitch: 1.0,
+      look: { color: "#e98e1f", skin: "#8d5a3b", hair: "#1d1512", pants: "#3a3530", style: "cap", accent: "#fff3d6" },
+      steps: {
+        2: {
+          preview: "Ich hab heute jemanden nach einem Stift gefragt.", mood: [3, 4], isNew: true,
+          monologue: ["Ich hab heute in Mathe jemanden nach einem Stift gefragt. Ich hatte selbst einen.", "Ich wollte nur wissen, ob ich mich trau.", "Er hat ihn mir gegeben und gefragt, ob ich die Aufgabe check. War gar nicht so schlimm."],
+          scene: {
+            env: "class", eye: 1.2, cam: [0, 0.4], look: [0, 1.1, -4],
+            npcs: [
+              { id: "n1", at: [2.5, 0.4], face: [2.5, -10], sit: true },
+              { id: "alex", char: "alex", at: [0, 2.6], face: [0, -10], sit: true },
+              { id: "c1", at: [-2.5, -1.6], face: [-2.5, -10], sit: true }, { id: "c2", at: [0, -1.6], face: [0, -10], sit: true }, { id: "c3", at: [-2.5, 0.4], face: [-2.5, -10], sit: true }
+            ],
+            beats: [
+              [L(2.5, 1.0, 0.4, 1500)],
+              [L(0, 0.3, -0.6, 1300)],
+              [L(2.5, 1.0, 0.4, 1000), { a: "turn", id: "n1", to: "cam" }, W(500), { a: "nod", id: "n1" }, W(400), { a: "laugh", ids: ["n1"] }]
+            ]
+          },
+          choices: [
+            { label: "Den Trick teilen", hint: "in der Gruppe erzählen", outcome: "Sam erzählt es in der Pause. Alex hört zu und sagt nichts, aber merkt es sich.",
+              beats: [L(0, 1.0, 2.6, 1400), { a: "turn", id: "alex", to: "cam" }, W(600), { a: "nod", id: "alex" }] },
+            { label: "Alex den Tipp schicken", hint: "direkt, ohne großes Ding", outcome: "„Probier's mal mit nem Stift 😄“ Alex liest es sofort. Die Strategie wandert weiter.",
+              beats: [{ a: "phone", on: true, screen: { type: "chat", title: "Alex", msgs: [{ me: true, text: "probier's mal mit nem stift 😄" }] } }, W(1400),
+                { a: "screen", target: "phone", spec: { type: "chat", title: "Alex", msgs: [{ me: true, text: "probier's mal mit nem stift 😄", react: "gelesen" }, { name: "Alex", text: "haha ok. morgen." }] } }] }
+          ]
+        },
+        3: {
+          preview: "Alex macht jetzt auch den Stift-Trick. Lol.", mood: [4, 5],
+          monologue: ["Alex hat mich gefragt, wie ich das mit dem Stift gemacht hab.", "Jetzt macht er's auch.", "Komisch, wie so ein kleiner Move weiterwandert."],
+          scene: {
+            env: "yard", eye: 1.6, cam: [0, 3], look: [-1, 1.5, -2],
+            npcs: [
+              { id: "alex", char: "alex", at: [-4, -2.5], face: [0, 3] },
+              { id: "g1", at: [2.2, -3.2], face: [3, -3.4] }, { id: "g2", at: [3.6, -3.6], face: [2.2, -3.2] },
+              { id: "jo", char: "jo", at: [9, 0], face: [0, 0] }
+            ],
+            beats: [
+              [{ a: "walk", id: "alex", to: [-0.6, 1.3], par: true }, L(-0.6, 1.5, 1.3, 2200), W(400), { a: "turn", id: "alex", to: "cam" }, W(300), { a: "nod", id: "alex" }],
+              [{ a: "walk", id: "alex", to: [1.3, -2.5], par: true }, L(2, 1.5, -3, 2400), W(300), { a: "turn", id: "alex", to: [2.2, -3.2] }, { a: "turn", id: "g1", to: [1.3, -2.5] }, W(400), { a: "nod", id: "g1" }],
+              [{ a: "laugh", ids: ["alex", "g1", "g2"] }, L(0, 3.4, -10, 2000)]
+            ]
+          },
+          choices: [
+            { label: "Neuen Mini-Move ausdenken", hint: "für nächste Woche", outcome: "Sams nächste Idee: jemandem ein Kompliment für die Präsentation machen. Die Liste wächst.",
+              beats: [{ a: "phone", on: true, screen: { type: "note", title: "Mini-Moves", items: [["Nach einem Stift fragen", true], ["Kompliment für die Präsi", false], ["Jemanden zur Bahn mitnehmen", false]] } }, L(0, 0.8, -2, 1000)] },
+            { label: "Jo davon erzählen", hint: "Jo kennt viele Leute", outcome: "Jo sagt: „Das brauchen noch mehr Leute.“ Die Idee verlässt die Gruppe.",
+              beats: [{ a: "walk", id: "jo", to: [1.4, 1.2], par: true }, L(3, 1.5, 0.6, 2400), W(1600), { a: "turn", id: "jo", to: "cam" }, W(200), { a: "wave", id: "jo" }, W(600), { a: "nod", id: "jo" }] }
+          ]
+        }
+      }
+    },
+    {
+      id: "jo", name: "Jo", role: "Brückenbauer:in", unlock: 3, slot: [1.1, 0.25], pitch: 1.1,
+      look: { color: "#13a58e", skin: "#c48a62", hair: "#7a3b1e", pants: "#283330", style: "bag", accent: "#ffb938" },
+      steps: {
+        3: {
+          preview: "Ich kenn euch alle. Wollt ihr euch auch kennen?", mood: [4, 5], isNew: true,
+          monologue: ["Ich bin irgendwie mit allen ein bisschen befreundet.", "Mir ist aufgefallen, dass Alex, Mia und Sam dieselben Sachen gut finden. Die wussten das nur nicht voneinander.", "Also hab ich eine Gruppe aufgemacht. Mehr braucht's manchmal nicht."],
+          scene: {
+            env: "yard", eye: 1.6, cam: [0, 3.2], look: [0, 1.5, -3],
+            npcs: [
+              { id: "alex", char: "alex", at: [-3.2, -1.2], face: [-5, -4] },
+              { id: "sam", char: "sam", at: [0, -3.8], face: [0, -10] },
+              { id: "mia", char: "mia", at: [3.2, -1.2], face: [5, -4] }
+            ],
+            beats: [
+              [L(-3.2, 1.5, -1.2, 1100), W(500), L(3.2, 1.5, -1.2, 1500), W(500), L(0, 1.5, -3.8, 1100)],
+              [{ a: "phone", on: true, screen: { type: "note", title: "Gemeinsam", items: [["Alex: Musik, Zeichnen", false], ["Mia: Musik, Serien", false], ["Sam: Zeichnen, Serien", false]] } }, L(0, 0.7, -2, 1200)],
+              [{ a: "screen", target: "phone", spec: { type: "chat", title: "Pausen-Crew", system: "Jo hat Alex, Mia und Sam hinzugefügt", msgs: [] } }]
+            ]
+          },
+          choices: [
+            { label: "Alle in eine Gruppe holen", hint: "„Pausen-Crew“", outcome: "Vier Namen in einer Gruppe. Die erste Nachricht kommt von Alex.",
+              beats: [W(500), { a: "screen", target: "phone", spec: { type: "chat", title: "Pausen-Crew", system: "Jo hat Alex, Mia und Sam hinzugefügt", msgs: [{ name: "Alex", text: "hi 👋" }] } },
+                { a: "turn", id: "alex", to: "cam" }, W(800), { a: "turn", id: "mia", to: "cam" }, { a: "turn", id: "sam", to: "cam" }, W(400), { a: "phone", on: false }, L(0, 1.5, -2, 1000), { a: "wave", id: "alex" }] },
+            { label: "Erstes Treffen vorschlagen", hint: "Freitag nach der Schule", outcome: "Alle sagen zu. Was einzeln anfing, ist jetzt ein Netz.",
+              beats: [{ a: "phone", on: false }, L(0, 1.5, -1.5, 900),
+                { a: "walk", id: "alex", to: [-1.3, 0.6], par: true }, { a: "walk", id: "sam", to: [0, -0.6], par: true }, { a: "walk", id: "mia", to: [1.3, 0.6], par: true }, W(2300),
+                { a: "turn", id: "alex", to: "cam" }, { a: "turn", id: "sam", to: "cam" }, { a: "turn", id: "mia", to: "cam" }, W(300),
+                { a: "wave", id: "alex" }, { a: "wave", id: "mia" }, { a: "laugh", ids: ["sam"] }] }
+          ]
+        }
+      }
+    },
+    {
+      id: "mia", name: "Mia", role: "Neu hier", unlock: 1, slot: [3.3, -0.3], pitch: 1.25,
+      look: { color: "#c25bd6", skin: "#f1c7a3", hair: "#c9852f", pants: "#2c2638", style: "long" },
+      steps: {
+        1: {
+          preview: "Ich hab den Chat stummgeschaltet. Fühlt sich trotzdem laut an.", mood: [1, 2],
+          monologue: ["Seit dem Umzug kenn ich hier kaum jemanden.", "Online sehen alle so verbunden aus.", "Ich tipp Nachrichten und lösch sie wieder. Was, wenn's komisch rüberkommt?"],
+          scene: {
+            env: "room", night: true, eye: 1.25, cam: [0, 1.4], look: [0, 1.6, -3],
+            npcs: [],
+            beats: [
+              [L(0, 1.8, -3, 1800)],
+              [{ a: "phone", on: true, screen: { type: "chat", title: "Klasse 9b", msgs: [{ name: "Ben", text: "😂😂😂" }, { name: "Lea", text: "wer kommt freitag?" }, { name: "Tom", text: "ich!!" }, { name: "Lea", text: "nice, alle dabei" }] } }, L(0.2, 0.6, -1.5, 1300)],
+              [{ a: "screen", target: "phone", spec: { type: "chat", title: "Klasse 9b", msgs: [{ name: "Lea", text: "wer kommt freitag?" }, { name: "Tom", text: "ich!!" }, { name: "Lea", text: "nice, alle dabei" }], draft: "Darf ich auch mitk" } }, W(1700),
+                { a: "screen", target: "phone", spec: { type: "chat", title: "Klasse 9b", msgs: [{ name: "Lea", text: "wer kommt freitag?" }, { name: "Tom", text: "ich!!" }, { name: "Lea", text: "nice, alle dabei" }], draft: "" } }]
+            ]
+          },
+          choices: [
+            { label: "Diesmal abschicken", hint: "nur einen Satz", outcome: "„Hat jemand die Seitenzahl für Deutsch?“ Eine Antwort nach zwei Minuten. Die Welt ist nicht untergegangen.",
+              beats: [{ a: "screen", target: "phone", spec: { type: "chat", title: "Klasse 9b", msgs: [{ name: "Lea", text: "nice, alle dabei" }, { me: true, text: "Hat jemand die Seitenzahl für Deutsch?" }] } }, W(1600),
+                { a: "screen", target: "phone", spec: { type: "chat", title: "Klasse 9b", msgs: [{ name: "Lea", text: "nice, alle dabei" }, { me: true, text: "Hat jemand die Seitenzahl für Deutsch?" }, { name: "Jonas", text: "S. 84 🙌" }] } }] },
+            { label: "Eine Person direkt fragen", hint: "statt der ganzen Gruppe", outcome: "Lea antwortet: „Klar, schick ich dir.“ Ein Name mehr, den Mia jetzt kennt.",
+              beats: [{ a: "screen", target: "phone", spec: { type: "chat", title: "Lea", msgs: [{ me: true, text: "Hey, hast du die Seitenzahl für Deutsch?" }] } }, W(1600),
+                { a: "screen", target: "phone", spec: { type: "chat", title: "Lea", msgs: [{ me: true, text: "Hey, hast du die Seitenzahl für Deutsch?" }, { name: "Lea", text: "Klar, schick ich dir" }, { name: "Lea", text: "bist du die Neue? 🙂" }] } }] }
+          ]
+        },
+        2: {
+          preview: "Okay. Eine Nachricht ist raus.", mood: [2, 3],
+          monologue: ["Ich hab gestern tatsächlich was in den Chat geschrieben. Zwei Leute haben reagiert.", "Sam meinte, das erste Mal ist immer das Komischste.", "Vielleicht stimmt das."],
+          scene: {
+            env: "room", night: false, eye: 1.25, cam: [0, 1.4], look: [0.2, 0.6, -1.5],
+            npcs: [],
+            beats: [
+              [{ a: "phone", on: true, screen: { type: "chat", title: "Klasse 9b", msgs: [{ name: "Tom", text: "hausaufgaben?" }, { me: true, text: "Seite 84, Nr. 3 und 4", react: "👍 2" }] } }],
+              [{ a: "screen", target: "phone", spec: { type: "chat", title: "Sam", msgs: [{ name: "Sam", voice: "0:09" }, { name: "Sam", text: "das erste mal ist immer das komischste" }] } }],
+              [{ a: "phone", on: false }, L(0, 1.8, -3, 1800)]
+            ]
+          },
+          choices: [
+            { label: "Heute nochmal schreiben", hint: "einfach so", outcome: "Mia teilt ein Meme. Drei Reaktionen. Das zweite Mal war wirklich leichter.",
+              beats: [L(0.2, 0.6, -1.5, 900), { a: "phone", on: true, screen: { type: "chat", title: "Klasse 9b", msgs: [{ me: true, text: "montag morgen be like 🧟" }] } }, W(1500),
+                { a: "screen", target: "phone", spec: { type: "chat", title: "Klasse 9b", msgs: [{ me: true, text: "montag morgen be like 🧟", react: "😂 3" }, { name: "Ben", text: "zu real" }] } }] },
+            { label: "Sam eine Sprachnachricht", hint: "kurz Danke sagen", outcome: "Sam schickt eine Sprachnachricht zurück. Aus einem Tipp wird ein Kontakt.",
+              beats: [L(0.2, 0.6, -1.5, 900), { a: "phone", on: true, screen: { type: "chat", title: "Sam", msgs: [{ name: "Sam", text: "das erste mal ist immer das komischste" }, { me: true, voice: "0:06" }] } }, W(1600),
+                { a: "screen", target: "phone", spec: { type: "chat", title: "Sam", msgs: [{ name: "Sam", text: "das erste mal ist immer das komischste" }, { me: true, voice: "0:06" }, { name: "Sam", voice: "0:11" }] } }] }
+          ]
+        },
+        3: {
+          preview: "Ich hab einen Lern-Call vorgeschlagen.", mood: [3, 5],
+          monologue: ["Ich hab vorgeschlagen, dass wir zusammen lernen. Per Call.", "Ich dachte, keiner hat Bock.", "Vier haben zugesagt."],
+          scene: {
+            env: "room", night: true, eye: 1.25, cam: [0, 1.4], look: [1.6, 1.0, -1.3],
+            npcs: [],
+            beats: [
+              [{ a: "screen", target: "laptop", spec: { type: "call", tiles: [["Mia", "#c25bd6"]] } }, L(1.8, 1.0, -1.4, 1400)],
+              [{ a: "phone", on: true, screen: { type: "chat", title: "Lerngruppe?", msgs: [{ me: true, text: "Lernen per Call? Do, 17 Uhr" }] } }, L(0.2, 0.6, -1.5, 1200)],
+              [{ a: "screen", target: "phone", spec: { type: "chat", title: "Lerngruppe?", msgs: [{ me: true, text: "Lernen per Call? Do, 17 Uhr" }, { name: "Sam", text: "bin dabei" }, { name: "Jo", text: "ja!" }, { name: "Lea", text: "safe" }, { name: "Ben", text: "👍" }] } }]
+            ]
+          },
+          choices: [
+            { label: "Termin festmachen", hint: "Donnerstag, 17 Uhr", outcome: "Donnerstag, 17 Uhr: Der Call läuft. Mia hat etwas angestoßen, das ohne sie nicht passiert wäre.",
+              beats: [{ a: "phone", on: false }, L(1.8, 1.0, -1.4, 1100), { a: "screen", target: "laptop", spec: { type: "call", tiles: [["Mia", "#c25bd6"], ["Sam", "#e98e1f"], ["Jo", "#13a58e"], ["Lea", "#7d8fa8"], ["Ben", "#a88f7d"]] } }] },
+            { label: "Alex extra einladen", hint: "persönlich, nicht nur im Chat", outcome: "Alex antwortet: „bin dabei“. Mia gibt weiter, was ihr selbst geholfen hat.",
+              beats: [{ a: "screen", target: "phone", spec: { type: "chat", title: "Alex", msgs: [{ me: true, text: "Kommst du Do auch? Wär cool 🙂" }] } }, W(1700),
+                { a: "screen", target: "phone", spec: { type: "chat", title: "Alex", msgs: [{ me: true, text: "Kommst du Do auch? Wär cool 🙂" }, { name: "Alex", text: "bin dabei" }] } }] }
+          ]
+        }
+      }
+    }
+  ],
+  edges: [
+    { a: "alex", b: "sam", step: 2 }, { a: "mia", b: "sam", step: 2 },
+    { a: "alex", b: "mia", step: 3 }, { a: "alex", b: "jo", step: 3 },
+    { a: "mia", b: "jo", step: 3 }, { a: "sam", b: "jo", step: 3 }
+  ]
+};
+const NPC_LOOKS = [
+  { color: "#8a8f99", skin: "#e3b896", hair: "#2d241f", pants: "#33363d", style: "short" },
+  { color: "#a6876f", skin: "#9c6a4a", hair: "#151010", pants: "#2f2a28", style: "bun" },
+  { color: "#6f8a7d", skin: "#f0caa8", hair: "#a8743a", pants: "#2a302d", style: "long" },
+  { color: "#9a7f9b", skin: "#c7936b", hair: "#3b2618", pants: "#302a33", style: "short" },
+  { color: "#7d8fa8", skin: "#e8bf9e", hair: "#5a3a22", pants: "#2a2e36", style: "cap", accent: "#d8d0c6" }
+];
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+const state = { step: 1, done: {}, points: 0, selected: null, mode: "select" };
+const $ = (id) => document.getElementById(id);
+const byId = (id) => DATA.characters.find(c => c.id === id);
+const available = (s = state.step) => DATA.characters.filter(c => c.steps[s]);
+const stepComplete = () => available().every(c => state.done[c.id] != null);
+const pointsBefore = (s) => { let n = 0; for (let i = 1; i < s; i++) n += available(i).length; return n; };
+function signalPct() {
+  const [lo, hi] = DATA.stages[state.step].signal; const list = available();
+  return Math.round(lo + (hi - lo) * list.filter(c => state.done[c.id] != null).length / list.length);
+}
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* =====================================================================
+   THREE – Grundgerüst
+   ===================================================================== */
+const canvas = $("gl");
+const R = new THREE.WebGLRenderer({ canvas, antialias: true });
+R.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
+R.outputEncoding = THREE.sRGBEncoding;
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(42, 1, 0.05, 200);
+scene.add(cam);
+const camLook = new THREE.Vector3(0, 1.3, 0);
+let eyeBase = 1.6;
+
+const hemi = new THREE.HemisphereLight("#bcc6ff", "#2a2230", 0.5); scene.add(hemi);
+const sun = new THREE.DirectionalLight("#ffe2c2", 0.8);
+sun.position.set(5, 10, 6); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+Object.assign(sun.shadow.camera, { left: -12, right: 12, top: 12, bottom: -12, near: 1, far: 40 });
+scene.add(sun); scene.add(sun.target);
+
+const stageG = new THREE.Group(); scene.add(stageG);
+const worldG = new THREE.Group(); scene.add(worldG);
+
+function M(color, o = {}) { return new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.78, metalness: 0 }, o)); }
+function mesh(geo, mat, x, y, z, parent) { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m; }
+function box(w, h, d, mat, x, y, z, parent) { return mesh(new THREE.BoxGeometry(w, h, d), typeof mat === "string" ? M(mat) : mat, x, y, z, parent); }
+
+/* ---------- Figuren ---------- */
+const figs = new Set();
+function makeFigure(look, opts = {}) {
+  const root = new THREE.Group(); const rig = new THREE.Group(); root.add(rig);
+  const dark = opts.locked;
+  const shade = dark ? "#16131b" : null;
+  const cloth = M(shade || look.color), skin = M(shade || look.skin), hairM = M(shade || look.hair), pants = M(shade || look.pants || "#2b2733");
+  const acc = M(shade || look.accent || look.color);
+  const legL = mesh(new THREE.CylinderGeometry(0.11, 0.1, 0.78, 10), pants, -0.14, 0.39, 0, rig);
+  const legR = mesh(new THREE.CylinderGeometry(0.11, 0.1, 0.78, 10), pants, 0.14, 0.39, 0, rig);
+  mesh(new THREE.CylinderGeometry(0.33, 0.29, 0.66, 18), cloth, 0, 1.07, 0, rig);
+  mesh(new THREE.SphereGeometry(0.33, 18, 12), cloth, 0, 1.39, 0, rig).scale.y = 0.55;
+  mesh(new THREE.SphereGeometry(0.29, 18, 10), cloth, 0, 0.76, 0, rig).scale.y = 0.45;
+  const head = new THREE.Group(); head.position.set(0, 1.76, 0); rig.add(head);
+  mesh(new THREE.SphereGeometry(0.25, 22, 16), skin, 0, 0, 0, head);
+  mesh(new THREE.CylinderGeometry(0.09, 0.1, 0.14, 10), skin, 0, -0.24, 0, head);
+  if (!dark) {
+    const eye = M("#18141d");
+    mesh(new THREE.SphereGeometry(0.032, 8, 6), eye, -0.085, 0.02, 0.225, head);
+    mesh(new THREE.SphereGeometry(0.032, 8, 6), eye, 0.085, 0.02, 0.225, head);
+  }
+  const cap = mesh(new THREE.SphereGeometry(0.268, 22, 12, 0, Math.PI * 2, 0, Math.PI * 0.52), hairM, 0, 0.02, -0.015, head);
+  cap.rotation.x = -0.18;
+  const st = look.style;
+  if (st === "hood") {
+    const hood = mesh(new THREE.TorusGeometry(0.2, 0.085, 8, 18), cloth, 0, -0.22, -0.13, head); hood.rotation.x = Math.PI / 2.3;
+    const band = mesh(new THREE.TorusGeometry(0.285, 0.025, 6, 24, Math.PI), M(shade || "#1c1c22"), 0, 0.02, 0, head);
+    mesh(new THREE.SphereGeometry(0.07, 10, 8), M(shade || "#f2ede6"), -0.285, 0.0, 0, head);
+    mesh(new THREE.SphereGeometry(0.07, 10, 8), M(shade || "#f2ede6"), 0.285, 0.0, 0, head);
+    band.rotation.z = 0;
+  } else if (st === "long") {
+    mesh(new THREE.BoxGeometry(0.5, 0.58, 0.14), hairM, 0, -0.2, -0.16, head);
+    mesh(new THREE.BoxGeometry(0.09, 0.42, 0.24), hairM, -0.235, -0.12, -0.02, head);
+    mesh(new THREE.BoxGeometry(0.09, 0.42, 0.24), hairM, 0.235, -0.12, -0.02, head);
+  } else if (st === "cap") {
+    mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.12, 20), acc, 0, 0.16, 0, head);
+    mesh(new THREE.BoxGeometry(0.3, 0.025, 0.24), acc, 0, 0.12, 0.25, head);
+  } else if (st === "bag") {
+    box(0.46, 0.52, 0.2, acc, 0, 1.1, -0.38, rig);
+    mesh(new THREE.SphereGeometry(0.12, 12, 10), hairM, 0, 0.24, -0.1, head);
+  } else if (st === "bun") {
+    mesh(new THREE.SphereGeometry(0.12, 12, 10), hairM, 0, 0.26, -0.1, head);
+  }
+  const arm = (side) => {
+    const p = new THREE.Group(); p.position.set(side * 0.41, 1.47, 0); rig.add(p);
+    mesh(new THREE.CylinderGeometry(0.085, 0.075, 0.62, 8), cloth, 0, -0.31, 0, p);
+    mesh(new THREE.SphereGeometry(0.085, 10, 8), skin, 0, -0.64, 0, p);
+    p.rotation.z = side * 0.12; return p;
+  };
+  const armL = arm(1), armR = arm(-1);
+  const f = { root, rig, head, armL, armR, legL, legR, phase: Math.random() * 6, laughUntil: 0, waveUntil: 0, nodStart: -9, walking: 0, sit: 0, mats: [cloth, skin, hairM, pants, acc] };
+  root.userData.fig = f;
+  figs.add(f);
+  return f;
+}
+function faceAngle(f, x, z) { return Math.atan2(x - f.root.position.x, z - f.root.position.z); }
+function shortest(a, b) { let d = (b - a) % (Math.PI * 2); if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2; return a + d; }
+
+/* ---------- Tweens ---------- */
+const tweens = new Set();
+const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+function tween(ms, fn, e = ease) {
+  if (reduced) ms = Math.min(ms, 200);
+  return new Promise(res => tweens.add({ t0: performance.now(), ms, fn, e, res }));
+}
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+function turnTo(f, x, z, ms = 500) {
+  const a0 = f.root.rotation.y, a1 = shortest(a0, faceAngle(f, x, z));
+  return tween(ms, t => f.root.rotation.y = a0 + (a1 - a0) * t);
+}
+async function walkTo(f, x, z, speed = 1.7) {
+  const p = f.root.position, sx = p.x, sz = p.z, d = Math.hypot(x - sx, z - sz);
+  await turnTo(f, x, z, 300);
+  f.walking++;
+  await tween(d / speed * 1000, t => { p.x = sx + (x - sx) * t; p.z = sz + (z - sz) * t; }, t => t);
+  f.walking--;
+}
+function lookTo(x, y, z, ms = 1300) {
+  const s = camLook.clone();
+  return tween(ms, t => camLook.set(s.x + (x - s.x) * t, s.y + (y - s.y) * t, s.z + (z - s.z) * t));
+}
+
+/* ---------- Bildschirme (Handy, Laptop) als Canvas-Textur ---------- */
+function makeScreen(w, h) {
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 4;
+  return { c, tex };
+}
+const FONT = '"DM Sans", system-ui, sans-serif';
+function wrap(x, text, maxW) {
+  const words = String(text).split(" "); const lines = []; let line = "";
+  for (const w of words) { const t = line ? line + " " + w : w; if (x.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t; }
+  lines.push(line); return lines;
+}
+function rr(x, X, Y, w, h, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); }
+function drawScreen(scr, spec) {
+  const { c } = scr; const x = c.getContext("2d"); const Wd = c.width, H = c.height;
+  x.fillStyle = "#14111a"; x.fillRect(0, 0, Wd, H);
+  if (spec.type === "call") {
+    const tiles = spec.tiles; const cols = tiles.length > 4 ? 3 : tiles.length > 1 ? 2 : 1; const rows = Math.ceil(tiles.length / cols);
+    const pad = 14, tw = (Wd - pad * (cols + 1)) / cols, th = (H - 50 - pad * (rows + 1)) / rows;
+    tiles.forEach(([n, col], i) => {
+      const cx = pad + (i % cols) * (tw + pad), cy = 50 + pad + Math.floor(i / cols) * (th + pad);
+      x.fillStyle = "#24202c"; rr(x, cx, cy, tw, th, 14); x.fill();
+      x.fillStyle = col; x.beginPath(); x.arc(cx + tw / 2, cy + th / 2 - 8, Math.min(tw, th) * 0.24, 0, Math.PI * 2); x.fill();
+      x.fillStyle = "#fff"; x.font = `700 ${Math.round(Math.min(tw, th) * 0.2)}px ${FONT}`; x.textAlign = "center"; x.fillText(n[0], cx + tw / 2, cy + th / 2 - 8 + Math.min(tw, th) * 0.07);
+      x.font = `500 18px ${FONT}`; x.fillText(n, cx + tw / 2, cy + th - 14); x.textAlign = "left";
+    });
+    x.fillStyle = "#fff"; x.font = `700 22px ${FONT}`; x.fillText("Lern-Call", 16, 34);
+    x.fillStyle = "#2fd3b4"; x.font = `500 16px ${FONT}`; x.fillText(`● ${tiles.length} im Call`, Wd - 130, 34);
+    scr.tex.needsUpdate = true; return;
+  }
+  x.fillStyle = "#211d29"; x.fillRect(0, 0, Wd, 86);
+  x.fillStyle = "#fff"; x.font = `700 28px ${FONT}`; x.fillText(spec.title || "", 24, 58);
+  if (spec.type === "feed") {
+    const cols = ["#4d5566", "#6a5a66", "#59666a", "#665d4d"];
+    for (let i = 0; i < 4; i++) { x.fillStyle = cols[i]; x.beginPath(); x.arc(52 + i * 80, 136, 30, 0, Math.PI * 2); x.fill(); }
+    for (let i = 0; i < 3; i++) {
+      const y = 190 + i * 150; x.fillStyle = "#2a2632"; rr(x, 20, y, Wd - 40, 136, 16); x.fill();
+      x.fillStyle = cols[(i + 1) % 4]; rr(x, 32, y + 12, Wd - 64, 80, 10); x.fill();
+      x.fillStyle = "#5e5866"; x.fillRect(32, y + 104, 160, 12); x.fillRect(32, y + 120, 100, 8);
+    }
+  } else if (spec.type === "note") {
+    let y = 140;
+    for (const [t, ok] of spec.items) {
+      x.strokeStyle = "#ffb938"; x.lineWidth = 3; rr(x, 24, y - 24, 30, 30, 8); x.stroke();
+      if (ok) { x.fillStyle = "#ffb938"; x.font = `700 24px ${FONT}`; x.fillText("✓", 29, y - 1); }
+      x.fillStyle = "#f4eee9"; x.font = `500 24px ${FONT}`;
+      const lines = wrap(x, t, Wd - 100); lines.forEach((l, i) => x.fillText(l, 70, y + i * 30)); y += 30 * lines.length + 34;
+    }
+  } else if (spec.type === "chat") {
+    let y = 120;
+    if (spec.system) { x.fillStyle = "#8f8697"; x.font = `500 18px ${FONT}`; x.textAlign = "center"; wrap(x, spec.system, Wd - 60).forEach(l => { x.fillText(l, Wd / 2, y); y += 24; }); x.textAlign = "left"; y += 16; }
+    const msgs = spec.msgs || [];
+    for (const m of msgs) {
+      x.font = `500 23px ${FONT}`;
+      const maxW = Wd * 0.68;
+      const lines = m.voice ? ["▶  ▂▅▇▃▆▂▅▃  " + m.voice] : wrap(x, m.text, maxW - 28);
+      const bw = Math.min(maxW, Math.max(...lines.map(l => x.measureText(l).width)) + 30), bh = lines.length * 30 + 22 + (m.me ? 0 : 22);
+      const bx = m.me ? Wd - bw - 18 : 18;
+      x.fillStyle = m.me ? "#f2662f" : "#2e2937"; rr(x, bx, y, bw, bh, 18); x.fill();
+      let ty = y + 34;
+      if (!m.me) { x.fillStyle = "#ffb938"; x.font = `600 17px ${FONT}`; x.fillText(m.name, bx + 15, y + 26); ty += 22; x.font = `500 23px ${FONT}`; }
+      x.fillStyle = "#fff"; lines.forEach((l, i) => x.fillText(l, bx + 15, ty + i * 30));
+      y += bh + (m.react ? 30 : 14);
+      if (m.react) { x.font = `500 17px ${FONT}`; x.fillStyle = "#b2a8b3"; x.textAlign = m.me ? "right" : "left"; x.fillText(m.react, m.me ? Wd - 24 : 24, y - 8); x.textAlign = "left"; }
+    }
+    if (spec.draft != null) {
+      x.fillStyle = "#211d29"; x.fillRect(0, H - 92, Wd, 92);
+      x.fillStyle = "#2e2937"; rr(x, 16, H - 74, Wd - 32, 56, 28); x.fill();
+      x.font = `500 22px ${FONT}`; x.fillStyle = spec.draft ? "#fff" : "#7d7486";
+      x.fillText(spec.draft ? spec.draft + "|" : "Nachricht", 36, H - 38);
+    }
+  }
+  scr.tex.needsUpdate = true;
+}
+
+/* Handy in der Hand (hängt an der Kamera) */
+const phoneScr = makeScreen(360, 680);
+const phone = new THREE.Group();
+{
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.33, 0.016), M("#141216", { roughness: 0.4 }));
+  phone.add(body);
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.155, 0.31), new THREE.MeshBasicMaterial({ map: phoneScr.tex, toneMapped: false }));
+  screen.position.z = 0.0085; phone.add(screen);
+  const hand = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 10), M("#d9a886")); hand.position.set(0.07, -0.13, -0.02); hand.scale.set(1, 1.3, 0.7); phone.add(hand);
+}
+phone.visible = false; cam.add(phone);
+const PHONE_ON = new THREE.Vector3(0.12, -0.17, -0.55), PHONE_OFF = new THREE.Vector3(0.12, -0.75, -0.55);
+phone.position.copy(PHONE_OFF); phone.rotation.set(-0.22, -0.12, 0);
+const phoneLight = new THREE.PointLight("#9fb6ff", 0, 1.2); phone.add(phoneLight); phoneLight.position.z = 0.2;
+async function phoneOn(on) {
+  if (on === phone.visible && !on) return;
+  phone.visible = true;
+  // rechts im Bild, über den Untertiteln; bei schmalen Screens weiter zur Mitte
+  const half = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * 0.62 * cam.aspect;
+  PHONE_ON.set(Math.min(0.2, half * 0.55), -0.06, -0.62); PHONE_OFF.set(PHONE_ON.x, -0.75, -0.62);
+  const s = phone.position.clone(), e = on ? PHONE_ON : PHONE_OFF;
+  phoneLight.intensity = on ? 0.6 : 0;
+  await tween(500, t => phone.position.lerpVectors(s, e, t));
+  if (!on) phone.visible = false;
+}
+let laptopScr = null;
+
+/* =====================================================================
+   AUSWAHL-BÜHNE
+   ===================================================================== */
+const STAGE_LIGHT = {
+  1: { bg: "#0d0c10", hemi: ["#9aa3b8", "#1a171e", 0.32], sun: ["#cfd6e6", 0.35], spot: "#dfe6ff", fog: 0.06 },
+  2: { bg: "#140d10", hemi: ["#ffd2a8", "#2a1a22", 0.45], sun: ["#ffd6b0", 0.55], spot: "#ffe2c0", fog: 0.05 },
+  3: { bg: "#160c1c", hemi: ["#ffc89a", "#30184a", 0.6], sun: ["#ffcfa0", 0.75], spot: "#fff0dc", fog: 0.04 }
+};
+const stage = { figs: {}, tubes: [], platform: null, particles: null };
+{
+  const plat = mesh(new THREE.CylinderGeometry(6.5, 7, 0.35, 64), M("#2a2430", { roughness: 0.9 }), 0, -0.175, 0, stageG);
+  stage.platform = plat;
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(6.5, 0.03, 6, 120), new THREE.MeshBasicMaterial({ color: "#ffb938" }));
+  rim.rotation.x = Math.PI / 2; rim.position.y = 0.01; stageG.add(rim); stage.rim = rim;
+  const backdrop = new THREE.Mesh(new THREE.CylinderGeometry(14, 14, 12, 64, 1, true, Math.PI * 0.75, Math.PI * 1.5), new THREE.MeshBasicMaterial({ color: "#1b1622", side: THREE.BackSide }));
+  backdrop.position.set(0, 5, 0); stageG.add(backdrop);
+  // Glühwürmchen-artige Funken im Hintergrund
+  const n = 160, g = new THREE.BufferGeometry(), pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { pos[i * 3] = (Math.random() - 0.5) * 22; pos[i * 3 + 1] = Math.random() * 7 + 0.3; pos[i * 3 + 2] = -Math.random() * 9 - 1.5; }
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  stage.motes = new THREE.Points(g, new THREE.PointsMaterial({ color: "#ffb938", size: 0.06, transparent: true, opacity: 0.5, depthWrite: false }));
+  stageG.add(stage.motes);
+}
+function questionSprite() {
+  const c = document.createElement("canvas"); c.width = c.height = 128; const x = c.getContext("2d");
+  x.fillStyle = "rgba(255,255,255,.85)"; x.font = `800 96px Sora, system-ui, sans-serif`; x.textAlign = "center"; x.fillText("?", 64, 98);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, opacity: 0.55, depthWrite: false })); s.scale.set(0.6, 0.6, 1); return s;
+}
+
+function clearGroup(g) {
+  for (const ch of [...g.children]) {
+    g.remove(ch);
+    ch.traverse(o => { if (o.userData.fig) figs.delete(o.userData.fig); if (o.geometry) o.geometry.dispose(); });
+  }
+}
+
+function buildStage(walkInNew = false) {
+  for (const id in stage.figs) { const s = stage.figs[id]; stageG.remove(s.root); figs.delete(s.fig); stageG.remove(s.spot); stageG.remove(s.spot.target); s.label.remove(); }
+  stage.tubes.forEach(t => stageG.remove(t.mesh)); stage.tubes = [];
+  stage.figs = {};
+  const L = STAGE_LIGHT[state.step];
+  for (const c of DATA.characters) {
+    const locked = c.unlock > state.step;
+    const f = makeFigure(c.look, { locked });
+    const [x, z] = c.slot;
+    f.root.position.set(x, 0, z);
+    f.root.rotation.y = Math.atan2(-x * 0.15, 1);
+    stageG.add(f.root);
+    f.root.traverse(o => o.userData.charId = c.id);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.62, 0.74, 48), new THREE.MeshBasicMaterial({ color: c.look.color, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.012; f.root.add(ring);
+    const spot = new THREE.SpotLight(L.spot, locked ? 0.25 : 0.9, 14, 0.42, 0.7, 1.4);
+    spot.position.set(x, 7, z + 2.5); spot.target.position.set(x, 0.8, z);
+    stageG.add(spot); stageG.add(spot.target);
+    let q = null; if (locked) { q = questionSprite(); q.position.set(0, 2.5, 0); f.root.add(q); }
+    const label = document.createElement("div"); label.className = "tagl" + (locked ? " locked" : ""); $("labels").appendChild(label);
+    stage.figs[c.id] = { c, fig: f, root: f.root, ring, spot, q, label, home: new THREE.Vector3(x, 0, z), locked };
+    if (walkInNew && c.unlock === state.step) {
+      f.root.position.set(x, 0, -7); f.root.rotation.y = 0;
+      sleep(400).then(() => walkTo(f, x, z, 2.2)).then(() => turnTo(f, x * 0.85, 10, 500)).then(() => { f.waveUntil = performance.now() + 1600; });
+    }
+  }
+  for (const e of DATA.edges) {
+    const A = stage.figs[e.a].home, B = stage.figs[e.b].home;
+    const mid = A.clone().add(B).multiplyScalar(0.5); mid.z += 1.1; mid.y = 0.05;
+    const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(A.x, 0.05, A.z), mid, new THREE.Vector3(B.x, 0.05, B.z));
+    const m = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 0.035, 6, false), new THREE.MeshBasicMaterial({ color: "#2fd3b4", transparent: true, opacity: 0, depthWrite: false }));
+    stageG.add(m); stage.tubes.push({ e, mesh: m });
+  }
+  applyStageLight();
+  refreshStage();
+}
+function applyStageLight() {
+  const L = STAGE_LIGHT[state.step];
+  scene.background = new THREE.Color(L.bg); scene.fog = new THREE.FogExp2(L.bg, L.fog);
+  hemi.color.set(L.hemi[0]); hemi.groundColor.set(L.hemi[1]); hemi.intensity = L.hemi[2];
+  sun.color.set(L.sun[0]); sun.intensity = L.sun[1]; sun.position.set(5, 10, 6); sun.target.position.set(0, 0, 0);
+}
+function refreshStage() {
+  for (const id in stage.figs) {
+    const s = stage.figs[id]; const done = state.done[id] != null; const active = !!s.c.steps[state.step];
+    s.ring.material.opacity = done ? 0.95 : 0;
+    s.ring.userData.pulse = active && !done && !s.locked;
+    const entry = s.c.steps[state.step];
+    let chip = "";
+    if (s.locked) chip = `<span class="s">ab ${DATA.stages[s.c.unlock].unit}</span>`;
+    else if (done) chip = `<span class="s ok">✓ erlebt</span>`;
+    else if (entry && entry.isNew) chip = `<span class="s new">neu</span>`;
+    else if (entry) chip = `<span class="s">ungehört</span>`;
+    s.label.innerHTML = `<span class="n">${s.locked ? "???" : s.c.name}</span>${chip}`;
+  }
+  for (const t of stage.tubes) {
+    const { e } = t; let op = 0;
+    if (state.step > e.step) op = 0.9;
+    else if (state.step === e.step) op = (state.done[e.a] != null && state.done[e.b] != null) ? 0.9 : 0.12;
+    t.target = op;
+  }
+}
+function stageCamPos() {
+  const a = cam.aspect;
+  return a < 0.8 ? { p: new THREE.Vector3(0, 2.6, 14.5), l: new THREE.Vector3(0, 1.4, 0) } : { p: new THREE.Vector3(0, 2.4, 9), l: new THREE.Vector3(0, 1.25, 0) };
+}
+
+/* =====================================================================
+   WELT (Ego-Perspektive)
+   ===================================================================== */
+const SKY = { 1: "#9ba0a8", 2: "#e9b48e", 3: "#ffa86a" };
+function buildEnv(sc) {
+  clearGroup(worldG); laptopScr = null;
+  const env = sc.env;
+  if (env === "yard") {
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), M("#5b5560")); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; worldG.add(ground);
+    for (let i = -3; i <= 3; i++) box(0.12, 0.01, 2.2, "#7a7380", i * 3, 0.006, -6, worldG);
+    box(44, 7, 1, "#9b8a7e", 0, 3.5, -12, worldG);
+    const win = M("#fff1cc", { emissive: "#ffcf7a", emissiveIntensity: state.step === 1 ? 0.15 : 0.45 });
+    for (let i = -6; i <= 6; i++) for (let r = 0; r < 2; r++) box(1.8, 1.3, 0.1, win, i * 3.2, 2.4 + r * 2.4, -11.45, worldG);
+    const tree = (x, z) => { mesh(new THREE.CylinderGeometry(0.18, 0.25, 2.4, 8), M("#5a4030"), x, 1.2, z, worldG); mesh(new THREE.SphereGeometry(1.5, 14, 10), M(state.step === 1 ? "#5d6b5a" : "#5f9a4f"), x, 3.2, z, worldG); };
+    tree(7.5, -6); tree(-8.5, -7.5); tree(9, 3);
+    box(2.2, 0.08, 0.6, "#a87a52", -6, 0.5, -4, worldG); box(0.1, 0.5, 0.5, "#333", -6.9, 0.25, -4, worldG); box(0.1, 0.5, 0.5, "#333", -5.1, 0.25, -4, worldG);
+    for (const x of [-11, 11]) { mesh(new THREE.CylinderGeometry(0.06, 0.06, 4, 8), M("#2d2a30"), x, 2, -2, worldG); }
+  } else if (env === "class") {
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), M("#b49b80")); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; worldG.add(floor);
+    box(14, 4, 0.2, "#e4dacc", 0, 2, -5, worldG); box(5, 1.6, 0.06, "#2f4a3d", 0, 2.1, -4.88, worldG);
+    box(0.2, 4, 14, "#ddd2c3", -6, 2, 0, worldG); box(0.2, 4, 14, "#ddd2c3", 6, 2, 0, worldG); box(14, 4, 0.2, "#e4dacc", 0, 2, 6, worldG);
+    const win = M("#d8ecff", { emissive: "#bfe0ff", emissiveIntensity: 0.6 });
+    for (const z of [-2.5, 1, 4]) box(0.06, 1.6, 2, win, 5.88, 2.2, z, worldG);
+    const wood = M("#c99a6b"), leg = M("#5a5560");
+    for (const dx of [-2.5, 0, 2.5]) for (const dz of [2.6, 0.4, -1.6]) {
+      box(1.4, 0.06, 0.7, wood, dx, 0.76, dz - 0.62, worldG);
+      for (const lx of [-0.62, 0.62]) box(0.05, 0.74, 0.05, leg, dx + lx, 0.37, dz - 0.62, worldG);
+      box(0.5, 0.05, 0.45, leg, dx, 0.45, dz, worldG);
+    }
+    box(0.18, 0.02, 0.02, M("#ffb938"), 0.3, 0.8, 2.0, worldG);
+    const lamp = new THREE.PointLight("#fff4e0", 0.6, 14); lamp.position.set(0, 3.6, 0); worldG.add(lamp);
+  } else if (env === "room") {
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), M("#6b5847")); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; worldG.add(floor);
+    const wall = M(sc.night ? "#8e7f93" : "#d9c7b5");
+    box(7, 3.5, 0.15, wall, 0, 1.75, -3, worldG); box(0.15, 3.5, 7, wall, -3, 1.75, 0, worldG); box(0.15, 3.5, 7, wall, 3, 1.75, 0, worldG); box(7, 3.5, 0.15, wall, 0, 1.75, 3.5, worldG);
+    box(1.9, 1.3, 0.05, M(sc.night ? "#1c2340" : "#a9dcff", { emissive: sc.night ? "#26305a" : "#a9dcff", emissiveIntensity: sc.night ? 0.6 : 0.8 }), 0, 1.85, -2.9, worldG);
+    box(2.0, 0.08, 0.06, "#4a3b30", 0, 1.17, -2.88, worldG);
+    if (sc.night) for (let i = 0; i < 6; i++) box(0.12, 0.12, 0.02, M("#ffd27a", { emissive: "#ffcf7a", emissiveIntensity: 1 }), -0.7 + i * 0.28, 1.5 + (i % 3) * 0.17, -2.86, worldG);
+    box(2.2, 0.5, 1.5, "#7a8fb8", -1.85, 0.25, -1.9, worldG); box(0.7, 0.18, 1.1, "#e9e3da", -2.5, 0.58, -1.9, worldG);
+    box(1.5, 0.06, 0.8, "#b28a62", 1.9, 0.76, -1.5, worldG);
+    for (const lx of [1.25, 2.55]) box(0.05, 0.74, 0.7, "#4a3b30", lx, 0.37, -1.5, worldG);
+    box(0.52, 0.02, 0.36, "#2a2730", 1.8, 0.8, -1.45, worldG);
+    laptopScr = makeScreen(640, 400); drawScreen(laptopScr, { type: "call", tiles: [] });
+    const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.32), new THREE.MeshBasicMaterial({ map: laptopScr.tex, toneMapped: false }));
+    scr.position.set(1.8, 0.97, -1.63); scr.rotation.set(-0.12, -0.55, 0); worldG.add(scr);
+    const back = box(0.52, 0.34, 0.015, "#2a2730", 1.805, 0.97, -1.645, worldG); back.rotation.copy(scr.rotation); back.position.z -= 0.004;
+    const lamp = new THREE.PointLight(sc.night ? "#ffbf7a" : "#fff4e6", sc.night ? 0.9 : 0.6, 8); lamp.position.set(1.8, 2.2, -1); worldG.add(lamp);
+  }
+  // Licht/Himmel je Umgebung und Stufe
+  const sky = env === "yard" ? SKY[state.step] : (sc.night ? "#1a1726" : "#cdb9a5");
+  scene.background = new THREE.Color(sky); scene.fog = new THREE.Fog(sky, 14, env === "yard" ? 40 : 30);
+  const warm = state.step === 1 ? "#d8dce6" : state.step === 2 ? "#ffd9b5" : "#ffc690";
+  hemi.color.set(warm); hemi.groundColor.set("#4a3c40"); hemi.intensity = env === "room" && sc.night ? 0.35 : 0.65;
+  sun.color.set(warm); sun.intensity = env === "yard" ? (state.step === 1 ? 0.45 : 0.95) : 0.4;
+  sun.position.set(6, 10, 4); sun.target.position.set(0, 0, -2);
+}
+const worldFigs = {};
+function buildNpcs(sc) {
+  for (const k in worldFigs) delete worldFigs[k];
+  sc.npcs.forEach((n, i) => {
+    const look = n.char ? byId(n.char).look : NPC_LOOKS[i % NPC_LOOKS.length];
+    const f = makeFigure(look);
+    f.root.position.set(n.at[0], 0, n.at[1]);
+    if (n.sit) { f.sit = 1; f.legL.visible = f.legR.visible = false; f.rig.position.y = -0.5; }
+    f.root.rotation.y = n.face ? faceAngle(f, n.face[0], n.face[1]) : 0;
+    worldG.add(f.root); worldFigs[n.id] = f;
+  });
+}
+
+/* ---------- Beat-Ausführung ---------- */
+async function runAction(a) {
+  const f = a.id && worldFigs[a.id];
+  switch (a.a) {
+    case "wait": return sleep(a.ms);
+    case "look": return lookTo(a.at[0], a.at[1], a.at[2], a.d || 1300);
+    case "turn": { if (!f) return; const to = a.to === "cam" ? [cam.position.x, cam.position.z] : a.to; turnTo(f, to[0], to[1], 500); return; }
+    case "wave": if (f) f.waveUntil = performance.now() + 1700; return;
+    case "nod": if (f) f.nodStart = performance.now(); return;
+    case "laugh": a.ids.forEach(id => { if (worldFigs[id]) worldFigs[id].laughUntil = performance.now() + 1800; }); return;
+    case "camNod": { const y0 = camLook.y; await tween(300, t => camLook.y = y0 - 0.35 * t); await tween(350, t => camLook.y = y0 - 0.35 * (1 - t)); return; }
+    case "walk": { const p = f ? walkTo(f, a.to[0], a.to[1]) : null; if (!a.par) await p; return; }
+    case "camWalk": {
+      const sx = cam.position.x, sz = cam.position.z, [tx, tz] = a.to, dx = tx - sx, dz = tz - sz;
+      const lx = camLook.x, lz = camLook.z;
+      const comp = (a.with || []).map(id => worldFigs[id]).filter(Boolean).map(g => ({ g, x: g.root.position.x, z: g.root.position.z }));
+      comp.forEach(c => c.g.walking++); camWalking++;
+      await tween(a.d || 3000, t => {
+        cam.position.x = sx + dx * t; cam.position.z = sz + dz * t; camLook.x = lx + dx * t; camLook.z = lz + dz * t;
+        comp.forEach(c => { c.g.root.position.x = c.x + dx * t; c.g.root.position.z = c.z + dz * t; });
+      }, t => t);
+      comp.forEach(c => c.g.walking--); camWalking--;
+      return;
+    }
+    case "phone": if (a.screen) drawScreen(phoneScr, a.screen); return phoneOn(a.on);
+    case "screen": {
+      if (a.target === "laptop") { if (laptopScr) drawScreen(laptopScr, a.spec); return; }
+      drawScreen(phoneScr, a.spec); if (!phone.visible || phone.position.y < -0.5) await phoneOn(true); return;
+    }
+  }
+}
+async function runBeats(list, token) {
+  for (const a of list || []) { if (token !== runToken) return; await runAction(a); }
+}
+let camWalking = 0;
+
+/* ---------- Stimme ---------- */
+let muted = false, skipFn = null, voices = [];
+const synth = window.speechSynthesis;
+function loadVoices() { try { voices = (synth && synth.getVoices() || []).filter(v => /^de/i.test(v.lang)); } catch (_) { voices = []; } }
+loadVoices(); try { synth && synth.addEventListener && synth.addEventListener("voiceschanged", loadVoices); } catch (_) {}
+function speak(text, c) {
+  return new Promise(res => {
+    let done = false; let tm;
+    const fin = () => { if (done) return; done = true; clearTimeout(tm); skipFn = null; setWave(false); res(); };
+    skipFn = () => { try { synth && synth.cancel(); } catch (_) {} fin(); };
+    const readMs = Math.max(2200, text.length * 62);
+    if (muted || !synth || !window.SpeechSynthesisUtterance) { setWave(!muted); tm = setTimeout(fin, readMs); return; }
+    tm = setTimeout(fin, text.length * 110 + 3500);
+    try {
+      const u = new SpeechSynthesisUtterance(text); u.lang = "de-DE"; u.pitch = c.pitch || 1; u.rate = 1.02;
+      if (voices.length) u.voice = voices[DATA.characters.indexOf(c) % voices.length];
+      u.onstart = () => setWave(true);
+      u.onend = () => setTimeout(fin, 250);
+      u.onerror = () => { clearTimeout(tm); setWave(true); tm = setTimeout(fin, readMs); };
+      synth.cancel(); synth.speak(u);
+      setWave(true);
+    } catch (_) { tm = setTimeout(fin, readMs); }
+  });
+}
+function setWave(on) { const w = document.querySelector(".fp .wave"); if (w) w.classList.toggle("off", !on); }
+
+/* =====================================================================
+   ABLAUF
+   ===================================================================== */
+let runToken = 0;
+const fade = (on) => { $("fade").classList.toggle("on", on); return sleep(on ? 480 : 300); };
+
+function select(id) {
+  if (state.mode !== "select") return;
+  const s = stage.figs[id]; if (!s || s.locked || !s.c.steps[state.step]) return;
+  const prev = state.selected;
+  if (prev && prev !== id) stepBack(prev);
+  state.selected = id;
+  const r = s.root;
+  const tz = s.home.z + 1.9, tx = s.home.x * 0.82;
+  const sx = r.position.x, sz = r.position.z;
+  s.fig.walking++;
+  turnTo(s.fig, tx, tz, 250);
+  tween(650, t => { r.position.x = sx + (tx - sx) * t; r.position.z = sz + (tz - sz) * t; }).then(() => {
+    s.fig.walking--; const { p } = stageCamPos(); turnTo(s.fig, p.x, p.z, 400);
+    if (state.selected === id) s.fig.waveUntil = performance.now() + 900;
+  });
+  const { p, l } = stageCamPos();
+  const target = l.clone().lerp(new THREE.Vector3(tx, 1.3, tz), 0.35);
+  lookTo(target.x, target.y, target.z, 800);
+  renderDock();
+}
+function stepBack(id) {
+  const s = stage.figs[id]; if (!s) return;
+  const r = s.root, sx = r.position.x, sz = r.position.z;
+  s.fig.walking++;
+  tween(600, t => { r.position.x = sx + (s.home.x - sx) * t; r.position.z = sz + (s.home.z - sz) * t; }).then(() => { s.fig.walking--; turnTo(s.fig, s.home.x * 0.85, 10, 400); });
+}
+function deselect() {
+  if (!state.selected) return;
+  stepBack(state.selected); state.selected = null;
+  const { l } = stageCamPos(); lookTo(l.x, l.y, l.z, 700);
+  renderDock();
+}
+
+async function enterPerspective() {
+  const id = state.selected; const s = stage.figs[id]; if (!s) return;
+  const c = s.c, entry = c.steps[state.step];
+  state.mode = "trans"; runToken++;
+  const token = runToken;
+  $("dock").innerHTML = ""; $("hud").classList.add("off"); $("labels").classList.add("off");
+  document.body.classList.add("cine");
+  // Kamera schwenkt um die Figur herum und fährt in ihren Kopf
+  const head = new THREE.Vector3(); s.fig.head.getWorldPosition(head);
+  const dir = new THREE.Vector3(Math.sin(s.root.rotation.y), 0, Math.cos(s.root.rotation.y));
+  const start = cam.position.clone(), look0 = camLook.clone();
+  const side = head.clone().add(new THREE.Vector3(dir.z * 2.2, 0.35, -dir.x * 2.2)).add(dir.clone().multiplyScalar(1.2));
+  const behind = head.clone().add(dir.clone().multiplyScalar(-0.75)).add(new THREE.Vector3(0, 0.12, 0));
+  const inside = head.clone().add(dir.clone().multiplyScalar(0.05));
+  const path = new THREE.CatmullRomCurve3([start, side, behind]);
+  const ahead = head.clone().add(dir.clone().multiplyScalar(4)).setY(head.y - 0.1);
+  await tween(1700, t => {
+    cam.position.copy(path.getPoint(t));
+    if (t < 0.6) camLook.copy(look0).lerp(head, t / 0.6);
+    else camLook.copy(head).lerp(ahead, (t - 0.6) / 0.4);
+  });
+  const p0 = cam.position.clone();
+  const fadeP = fade(true);
+  await tween(450, t => cam.position.lerpVectors(p0, inside, t));
+  await fadeP;
+  if (token !== runToken) return;
+  // Szene aufbauen
+  const sc = entry.scene;
+  stageG.visible = false; buildEnv(sc); buildNpcs(sc); worldG.visible = true;
+  eyeBase = sc.eye; cam.position.set(sc.cam[0], sc.eye, sc.cam[1]); camLook.set(...sc.look);
+  phone.visible = false; phone.position.copy(PHONE_OFF); phoneLight.intensity = 0;
+  state.mode = "fp";
+  renderFp(c, "intro");
+  await fade(false);
+  // Monolog Zeile für Zeile, Szene läuft parallel
+  for (let i = 0; i < entry.monologue.length; i++) {
+    if (token !== runToken) return;
+    showSub(c, entry.monologue[i]);
+    await Promise.all([speak(entry.monologue[i], c), runBeats(sc.beats[i], token)]);
+    await sleep(250);
+  }
+  if (token !== runToken) return;
+  renderFp(c, "decide");
+}
+
+async function choose(i) {
+  const c = byId(state.selected); const entry = c.steps[state.step];
+  const first = state.done[c.id] == null;
+  if (first) { state.done[c.id] = i; state.points += 1; }
+  renderHud();
+  renderFp(c, "result", i, first);
+  await runBeats(entry.choices[i].beats, runToken);
+}
+
+async function exitPerspective() {
+  runToken++; if (skipFn) skipFn();
+  state.mode = "trans";
+  await fade(true);
+  $("fp").hidden = true; $("fp").innerHTML = "";
+  worldG.visible = false; clearGroup(worldG); phone.visible = false;
+  stageG.visible = true; applyStageLight();
+  const id = state.selected; state.selected = null;
+  const s = stage.figs[id];
+  if (s) { s.root.position.copy(s.home); s.root.rotation.y = Math.atan2(-s.home.x * 0.15, 1); }
+  const { p, l } = stageCamPos(); cam.position.copy(p); camLook.copy(l);
+  refreshStage();
+  document.body.classList.remove("cine");
+  state.mode = "select";
+  await fade(false);
+  $("hud").classList.remove("off"); $("labels").classList.remove("off");
+  if (s && state.done[id] != null) { s.fig.laughUntil = performance.now() + 1400; }
+  if (state.step === 3 && stepComplete()) return celebrate();
+  renderDock();
+}
+
+function setStep(n, walkIn = false) {
+  runToken++; if (skipFn) skipFn();
+  state.step = n; state.done = {}; state.points = pointsBefore(n); state.selected = null; state.mode = "select";
+  $("cele").hidden = true; $("fp").hidden = true; document.body.classList.remove("cine");
+  $("hud").classList.remove("off"); $("labels").classList.remove("off");
+  worldG.visible = false; stageG.visible = true; stopParticles();
+  const { p, l } = stageCamPos(); cam.position.copy(p); camLook.copy(l);
+  buildStage(walkIn);
+  renderHud(); renderDock();
+}
+
+/* ---------- Feier ---------- */
+function celebrate() {
+  state.mode = "celebrate";
+  $("dock").innerHTML = ""; $("labels").classList.add("off");
+  for (const id in stage.figs) {
+    const s = stage.figs[id]; const { p } = stageCamPos();
+    turnTo(s.fig, p.x, p.z, 600);
+    setTimeout(() => { s.fig.waveUntil = performance.now() + 4000; s.fig.laughUntil = performance.now() + 2500; }, 300 + Math.random() * 500);
+    s.spot.intensity = 1.6;
+  }
+  stage.tubes.forEach(t => t.target = 1);
+  startParticles();
+  const { l } = stageCamPos(); lookTo(l.x, l.y + 0.3, l.z, 1200);
+  setTimeout(() => {
+    $("cele").hidden = false;
+    $("cele").innerHTML = `<div class="inner" role="dialog" aria-modal="true" aria-labelledby="celT">
+      <div class="big" id="celNum">80%</div>
+      <h2 id="celT">Signal wiederhergestellt</h2>
+      <p>Alex, Mia, Sam und Jo sind verbunden. Ein Stift, ein Emoji, eine Gruppe. Kleine Moves, volles Netz.</p>
+      <button type="button" class="next" id="restart">Nächsten Zyklus starten</button></div>`;
+    const num = $("celNum"); let v = 80; const tick = () => { v = Math.min(100, v + 1); num.textContent = v + "%"; if (v < 100) setTimeout(tick, 35); }; tick();
+    $("restart").focus();
+  }, 900);
+}
+let particles = null;
+function startParticles() {
+  stopParticles();
+  const n = 500, g = new THREE.BufferGeometry(), pos = new Float32Array(n * 3), col = new Float32Array(n * 3), vel = [];
+  const pal = ["#ffd166", "#ffffff", "#2fd3b4", "#ff7a3d", "#c9a7ff"].map(c => new THREE.Color(c));
+  for (let i = 0; i < n; i++) {
+    pos.set([0, 1.6, 0.5], i * 3); const c = pal[i % pal.length]; col.set([c.r, c.g, c.b], i * 3);
+    const a = Math.random() * Math.PI * 2, u = Math.random() * 0.9 + 0.1, sp = 0.05 + Math.random() * 0.12;
+    vel.push(new THREE.Vector3(Math.cos(a) * u * sp, (0.08 + Math.random() * 0.12), Math.sin(a) * u * sp * 0.6));
+  }
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  particles = new THREE.Points(g, new THREE.PointsMaterial({ size: 0.11, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+  particles.userData.vel = vel; stageG.add(particles);
+}
+function stopParticles() { if (particles) { stageG.remove(particles); particles.geometry.dispose(); particles = null; } }
+
+/* =====================================================================
+   UI-RENDER
+   ===================================================================== */
+const PLAY = '<svg viewBox="0 0 10 10"><path d="M2 1v8l7-4z"/></svg>';
+const rx = (lvl) => `<span class="rx">${[0, 1, 2, 3, 4].map(i => `<i class="${i < lvl ? "on" : ""}" style="height:${30 + i * 17.5}%"></i>`).join("")}</span>`;
+
+function renderHud() {
+  document.documentElement.dataset.step = state.step;
+  $("stepper").innerHTML = [1, 2, 3].map(n => {
+    const s = DATA.stages[n];
+    return `<button type="button" id="step-${n}" data-step="${n}"${n === state.step ? ' aria-current="step"' : ""}${n < state.step ? ' class="past"' : ""}><span class="u">${s.unit}</span><span class="t">${s.title}</span></button>`;
+  }).join("");
+  const pct = signalPct();
+  $("fill").style.width = pct + "%"; $("pct").textContent = pct + "%"; $("track").setAttribute("aria-valuenow", pct);
+  $("pts").innerHTML = `Signalpunkte <b>${state.points}</b>`;
+}
+function renderDock() {
+  const d = $("dock");
+  if (state.mode !== "select") { d.innerHTML = ""; return; }
+  const st = DATA.stages[state.step];
+  if (!state.selected) {
+    if (stepComplete() && st.next) d.innerHTML = `<button type="button" class="next" id="nextStep">${st.next} →</button>`;
+    else {
+      const left = available().filter(c => state.done[c.id] == null).length;
+      d.innerHTML = `<div class="hint">${st.unit} · ${st.title} · Wähle eine Figur${left ? ` (${left} offen)` : ""}</div>`;
+    }
+    return;
+  }
+  const c = byId(state.selected); const e = c.steps[state.step]; const done = state.done[c.id] != null;
+  d.innerHTML = `<div class="sel" style="--c:${c.look.color}">
+    <span class="eyebrow">${st.unit} · ${c.role}${e.isNew ? " · neu dabei" : ""}</span>
+    <h2>${c.name}</h2>
+    <q>${e.preview}</q>
+    <div class="mood">${rx(done ? e.mood[1] : e.mood[0])} Empfang: <b>${DATA.moodScale[done ? e.mood[1] : e.mood[0]]}</b></div>
+    <div class="btns">
+      <button type="button" class="primary" id="enter"><span class="k">${PLAY}</span>${done ? "Nochmal erleben" : "Perspektive übernehmen"}</button>
+      <button type="button" class="ghost" id="back">Zurück</button>
+    </div></div>`;
+  $("enter").focus({ preventScroll: true });
+}
+function showSub(c, text) {
+  const s = $("fp").querySelector(".sub"); if (!s) return;
+  s.innerHTML = `<div class="who">${c.name} <span class="wave"><i></i><i></i><i></i><i></i></span></div><div class="line">${text}</div>`;
+}
+function renderFp(c, phase, pick, first) {
+  const fp = $("fp"); fp.hidden = false; fp.style.setProperty("--c", c.look.color);
+  const e = c.steps[state.step];
+  const head = `<div class="fp-tag"><span class="dot"></span>Ego-Perspektive · ${c.name}</div>
+    <div class="fp-ctrl"><button type="button" id="mute">${muted ? "Ton an" : "Ton aus"}</button>${phase === "intro" ? '<button type="button" id="skip">Weiter ›</button>' : ""}<button type="button" id="leave">Verlassen</button></div>`;
+  if (phase === "intro") fp.innerHTML = head + `<div class="sub"></div>`;
+  else if (phase === "decide") {
+    fp.innerHTML = head + `<div class="decide"><div class="ask">Was machst du als ${c.name}?</div><div class="row">${e.choices.map((ch, i) =>
+      `<button type="button" class="choice" id="choice-${i}" data-i="${i}"><span class="key">${i === 0 ? "A" : "B"}</span><span>${ch.label}</span><small>${ch.hint}</small></button>`).join("")}</div></div>`;
+    $("choice-0").focus({ preventScroll: true });
+  } else if (phase === "result") {
+    fp.innerHTML = head + `<div class="result">
+      <span class="plus">${first ? '<span class="b">+1</span> Signalpunkt' : "Schon erlebt"} · ${rx(e.mood[1])} ${DATA.moodScale[e.mood[1]]}</span>
+      <p>${e.choices[pick].outcome}</p>
+      <div class="btns"><button type="button" class="primary" id="leaveRes">Zurück zur Auswahl</button></div></div>`;
+    $("leaveRes").focus({ preventScroll: true });
+  }
+}
+
+/* =====================================================================
+   EINGABE
+   ===================================================================== */
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+function pick(ev) {
+  const r = canvas.getBoundingClientRect();
+  ptr.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ptr, cam);
+  const hits = ray.intersectObjects(Object.values(stage.figs).map(s => s.root), true);
+  for (const h of hits) { const id = h.object.userData.charId; const s = stage.figs[id]; if (s && !s.locked && s.c.steps[state.step]) return id; }
+  return null;
+}
+canvas.addEventListener("pointermove", ev => { if (state.mode === "select") canvas.classList.toggle("hover", !!pick(ev)); });
+canvas.addEventListener("click", ev => {
+  if (state.mode !== "select") return;
+  const id = pick(ev);
+  if (id) { id === state.selected ? enterPerspective() : select(id); }
+  else if (state.selected) deselect();
+});
+document.addEventListener("click", ev => {
+  const t = ev.target;
+  const st = t.closest("#stepper button"); if (st) return setStep(+st.dataset.step);
+  if (t.closest("#nextStep")) return setStep(state.step + 1, true);
+  if (t.closest("#enter")) return enterPerspective();
+  if (t.closest("#back")) return deselect();
+  if (t.closest("#skip")) { if (skipFn) skipFn(); return; }
+  if (t.closest("#mute")) { muted = !muted; if (muted && skipFn) { try { synth && synth.cancel(); } catch (_) {} } t.textContent = muted ? "Ton an" : "Ton aus"; return; }
+  if (t.closest("#leave") || t.closest("#leaveRes")) return exitPerspective();
+  const ch = t.closest(".choice"); if (ch) return choose(+ch.dataset.i);
+  if (t.closest("#restart")) return setStep(1, false);
+});
+document.addEventListener("keydown", ev => {
+  if (state.mode === "select") {
+    const ids = available().map(c => c.id).filter(id => !stage.figs[id].locked);
+    const order = DATA.characters.map(c => c.id).filter(id => ids.includes(id));
+    if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") {
+      const i = order.indexOf(state.selected); const n = ev.key === "ArrowRight" ? (i + 1) % order.length : (i - 1 + order.length) % order.length;
+      select(order[i < 0 ? 0 : n]); ev.preventDefault();
+    }
+    if (ev.key === "Escape") deselect();
+  } else if (state.mode === "fp") {
+    if (ev.key === "Escape") exitPerspective();
+    if (ev.key === "a" || ev.key === "A") { const b = $("choice-0"); b && b.click(); }
+    if (ev.key === "b" || ev.key === "B") { const b = $("choice-1"); b && b.click(); }
+  }
+});
+
+/* =====================================================================
+   LOOP
+   ===================================================================== */
+const tmpV = new THREE.Vector3();
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  R.setSize(w, h, false); cam.aspect = w / h; cam.fov = cam.aspect < 0.8 ? 60 : 42; cam.updateProjectionMatrix();
+  if (state.mode === "select" && !state.selected) { const { p, l } = stageCamPos(); cam.position.copy(p); camLook.copy(l); }
+}
+window.addEventListener("resize", resize);
+
+function loop(now) {
+  requestAnimationFrame(loop);
+  const t = now / 1000;
+  for (const tw of [...tweens]) {
+    const p = Math.min(1, (now - tw.t0) / tw.ms); tw.fn(tw.e(p));
+    if (p >= 1) { tweens.delete(tw); tw.res(); }
+  }
+  for (const f of figs) {
+    const r = f.rig; const base = f.sit ? -0.5 : 0;
+    let y = Math.sin(t * 2 + f.phase) * 0.012;
+    if (f.walking > 0) { y += Math.abs(Math.sin(t * 9 + f.phase)) * 0.06; f.legL.rotation.x = Math.sin(t * 9) * 0.5; f.legR.rotation.x = -Math.sin(t * 9) * 0.5; }
+    else { f.legL.rotation.x *= 0.8; f.legR.rotation.x *= 0.8; }
+    if (now < f.laughUntil) { y += Math.abs(Math.sin(t * 13)) * 0.05; f.head.rotation.x = -0.15; } else f.head.rotation.x *= 0.9;
+    r.position.y = base + y;
+    const sideR = -1;
+    if (now < f.waveUntil) f.armR.rotation.z += ((sideR * 2.5 + Math.sin(t * 11) * 0.35) - f.armR.rotation.z) * 0.25;
+    else f.armR.rotation.z += (sideR * 0.12 + (f.walking > 0 ? 0 : 0) - f.armR.rotation.z) * 0.15;
+    f.armL.rotation.x = f.walking > 0 ? -Math.sin(t * 9) * 0.4 : f.armL.rotation.x * 0.85;
+    const nd = (now - f.nodStart) / 900;
+    if (nd >= 0 && nd < 1) f.head.rotation.x = Math.sin(nd * Math.PI * 2) * 0.32;
+  }
+  if (stageG.visible) {
+    for (const id in stage.figs) {
+      const s = stage.figs[id];
+      if (s.ring.userData.pulse) { s.ring.material.opacity = 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(t * 3)); s.ring.scale.setScalar(1 + 0.08 * Math.sin(t * 3)); }
+      else s.ring.scale.setScalar(1);
+      const want = s.locked ? 0.25 : state.mode === "celebrate" ? 1.6 : state.selected ? (state.selected === id ? 2.2 : 0.35) : (s.c.steps[state.step] ? 0.95 : 0.4);
+      s.spot.intensity += (want - s.spot.intensity) * 0.08;
+      s.spot.position.x = s.root.position.x; s.spot.position.z = s.root.position.z + 2.5; s.spot.target.position.set(s.root.position.x, 0.8, s.root.position.z);
+      if (s.q) s.q.position.y = 2.5 + Math.sin(t * 2 + s.fig.phase) * 0.08;
+      tmpV.set(s.root.position.x, 2.35, s.root.position.z).project(cam);
+      s.label.style.left = ((tmpV.x + 1) / 2 * window.innerWidth) + "px";
+      s.label.style.top = ((1 - tmpV.y) / 2 * window.innerHeight) + "px";
+      s.label.style.opacity = state.selected && state.selected !== id ? 0.35 : 1;
+    }
+    for (const tb of stage.tubes) { const m = tb.mesh.material; m.opacity += ((tb.target || 0) * (0.75 + 0.25 * Math.sin(t * 4)) - m.opacity) * 0.06; }
+    stage.motes.rotation.y = Math.sin(t * 0.05) * 0.1; stage.motes.position.y = Math.sin(t * 0.4) * 0.15;
+    if (particles) {
+      const pos = particles.geometry.attributes.position, v = particles.userData.vel;
+      for (let i = 0; i < v.length; i++) {
+        v[i].y -= 0.0035; pos.array[i * 3] += v[i].x; pos.array[i * 3 + 1] += v[i].y; pos.array[i * 3 + 2] += v[i].z;
+        if (pos.array[i * 3 + 1] < 0) { pos.array.set([0, 1.6, 0.5], i * 3); const a = Math.random() * 6.28, sp = 0.05 + Math.random() * 0.12; v[i].set(Math.cos(a) * sp, 0.08 + Math.random() * 0.12, Math.sin(a) * sp * 0.6); }
+      }
+      pos.needsUpdate = true;
+    }
+  }
+  if (state.mode === "fp") {
+    cam.position.y = eyeBase + Math.sin(t * 1.3) * 0.008 + (camWalking ? Math.abs(Math.sin(t * 8)) * 0.03 : 0);
+  }
+  cam.lookAt(camLook);
+  R.render(scene, cam);
+}
+
+resize();
+setStep(1);
+$("loading").remove();
+requestAnimationFrame(loop);
+</script>

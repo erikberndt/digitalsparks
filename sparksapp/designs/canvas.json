@@ -1,0 +1,471 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "D-Mobile-Werkzeuge.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "D · Mobile – Werkzeuge geöffnet",
+      "w": 390,
+      "x": 2990,
+      "y": 2520
+    },
+    "D-Mobile.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "D · Mobile",
+      "w": 390,
+      "x": 1260,
+      "y": 2520
+    },
+    "D-Tablet-Werkzeuge.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "D · Tablet – Werkzeuge geöffnet",
+      "w": 1180,
+      "x": 1730,
+      "y": 2520
+    },
+    "D-Tablet.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "D · Tablet",
+      "w": 1180,
+      "x": 0,
+      "y": 2520
+    },
+    "E-Mobile-Kapitel.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "E · Mobile – Kapitel 1 geöffnet",
+      "w": 390,
+      "x": 2990,
+      "y": 3784
+    },
+    "E-Mobile.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "E · Mobile (Quick Fix)",
+      "w": 390,
+      "x": 1260,
+      "y": 3784
+    },
+    "E-Tablet-Kapitel.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "E · Tablet – Kapitel 1 geöffnet",
+      "w": 1180,
+      "x": 1730,
+      "y": 3784
+    },
+    "E-Tablet.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "E · Tablet (Bestand)",
+      "w": 1180,
+      "x": 0,
+      "y": 3784
+    },
+    "F1-Landing.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "1 · Lernreise (Web)",
+      "w": 390,
+      "x": 0,
+      "y": 5048
+    },
+    "F2-Login.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "2 · Anmelden (Web)",
+      "w": 390,
+      "x": 470,
+      "y": 5048
+    },
+    "F3-Registrieren.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "3 · Registrieren (App)",
+      "w": 390,
+      "x": 940,
+      "y": 5048
+    },
+    "F4-Geraet.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "4 · Weiter am Tablet (App)",
+      "w": 390,
+      "x": 1410,
+      "y": 5048
+    },
+    "G-Mobile.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "G · Reise-Karte – Mobile",
+      "w": 390,
+      "x": 1260,
+      "y": 6312
+    },
+    "G-Tablet.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "G · Reise-Karte – Tablet",
+      "w": 1180,
+      "x": 0,
+      "y": 6312
+    },
+    "H0-Start.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "0 · Start: Willkommen zu social.me_dia",
+      "w": 1180,
+      "x": 2520,
+      "y": 7576
+    },
+    "H1-Board.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "1 · Team-Board (Startpunkt)",
+      "w": 1180,
+      "x": 0,
+      "y": 7576
+    },
+    "H2-Discover.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "2 · Discover: Inhalte neben dem Board",
+      "w": 1180,
+      "x": 1260,
+      "y": 7576
+    },
+    "H3-Create.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "3 · Create: Hilfe neben dem Board",
+      "w": 1180,
+      "x": 0,
+      "y": 8596
+    },
+    "H4-Share.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "4 · Share: Präsentationsmodus",
+      "w": 1180,
+      "x": 1260,
+      "y": 8596
+    },
+    "K-Kampagne.dc.html": {
+      "h": 2440,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "0 · Kampagnenseite (ganze Seite)",
+      "w": 390,
+      "x": 1880,
+      "y": 5048
+    },
+    "L1-Lagerfeuer.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "1 · Das Lagerfeuer (Discover)",
+      "w": 1180,
+      "x": 0,
+      "y": 10020
+    },
+    "L2-Labor.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "2 · Das Labor (Create)",
+      "w": 1180,
+      "x": 1260,
+      "y": 10020
+    },
+    "Main.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "A · Pfad (Timeline)",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "Phasen.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "B · Phasen-Tabs",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "Sternbild.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "C · Sternbild-Karte",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "Tablet-Pfad.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "A · Pfad – Tablet quer",
+      "w": 1180,
+      "x": 0,
+      "y": 1300
+    },
+    "Tablet-Phasen.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "B · Phasen-Tabs – Tablet quer",
+      "w": 1180,
+      "x": 1260,
+      "y": 1300
+    },
+    "Tablet-Sternbild.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "C · Sternbild-Karte – Tablet quer",
+      "w": 1180,
+      "x": 2520,
+      "y": 1300
+    },
+    "J1-Lernreise-Tablet.dc.html": {
+      "x": 0,
+      "y": 11364,
+      "w": 1180,
+      "h": 820,
+      "title": "J1 · Lernreise – Tablet (Etappe gewählt)",
+      "is_interactive": true,
+      "radius": 24
+    },
+    "J1-Lernreise-Tablet-Lehrkraft.dc.html": {
+      "x": 1260,
+      "y": 11364,
+      "w": 1180,
+      "h": 820,
+      "title": "J1 · Lernreise – Tablet, Lehrkraft (Apps offen)",
+      "is_interactive": true,
+      "radius": 24
+    },
+    "J1-Lernreise-Mobile.dc.html": {
+      "x": 2520,
+      "y": 11364,
+      "w": 390,
+      "h": 844,
+      "title": "J1 · Lernreise – Mobile",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "J1-Lernreise-Mobile-Lehrkraft.dc.html": {
+      "x": 2990,
+      "y": 11364,
+      "w": 390,
+      "h": 844,
+      "title": "J1 · Lernreise – Mobile, Lehrkraft (Etappe gewählt)",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "J2-Inhalt-Tablet.dc.html": {
+      "x": 0,
+      "y": 12424,
+      "w": 1180,
+      "h": 820,
+      "title": "J2 · Inhalt – Seite 1",
+      "is_interactive": true,
+      "radius": 24
+    },
+    "J2-Inhalt-Tablet-Wahl.dc.html": {
+      "x": 1260,
+      "y": 12424,
+      "w": 1180,
+      "h": 820,
+      "title": "J2 · Inhalt – Wahl-Seite (3 Wege)",
+      "is_interactive": true,
+      "radius": 24
+    },
+    "J2-Inhalt-Tablet-Zusammen.dc.html": {
+      "x": 2520,
+      "y": 12424,
+      "w": 1180,
+      "h": 820,
+      "title": "J2 · Inhalt – Wege treffen sich",
+      "is_interactive": true,
+      "radius": 24
+    },
+    "J2-Inhalt-Tablet-Uebersicht.dc.html": {
+      "x": 3780,
+      "y": 12424,
+      "w": 1180,
+      "h": 820,
+      "title": "J2 · Inhalt – Übersicht (Overlay)",
+      "is_interactive": true,
+      "radius": 24
+    },
+    "J2-Inhalt-Mobile.dc.html": {
+      "x": 5040,
+      "y": 12424,
+      "w": 390,
+      "h": 844,
+      "title": "J2 · Inhalt – Mobile, Wahl-Seite",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "J2-Inhalt-Mobile-Uebersicht.dc.html": {
+      "x": 5510,
+      "y": 12424,
+      "w": 390,
+      "h": 844,
+      "title": "J2 · Inhalt – Mobile, Übersicht",
+      "is_interactive": true,
+      "radius": 44
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-06T10:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "heading": {
+      "kind": "title1",
+      "maxW": 1330,
+      "text": "Lernreise-Übersicht · 3 mobile Varianten",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "heading-d": {
+      "kind": "title1",
+      "maxW": 3380,
+      "text": "D · Schritte als Leiste · Showroom & Bibliothek vorne, Rest in Werkzeuge",
+      "w": 240,
+      "x": 0,
+      "y": 2220
+    },
+    "heading-e": {
+      "kind": "title1",
+      "maxW": 3380,
+      "text": "E · Quick Fix · Klick auf ein Kapitel zeigt die Unterkapitel",
+      "w": 240,
+      "x": -7,
+      "y": 3553
+    },
+    "heading-f": {
+      "kind": "title1",
+      "maxW": 1800,
+      "text": "Conversion-Flow mobil: Lernreise → Anmelden → Registrieren → Tablet",
+      "w": 240,
+      "x": 0,
+      "y": 4748
+    },
+    "heading-g": {
+      "kind": "title1",
+      "maxW": 1650,
+      "text": "G · Reise-Karte · Phasen unten, Station als Fenster",
+      "w": 240,
+      "x": 0,
+      "y": 6012
+    },
+    "heading-h": {
+      "kind": "title1",
+      "maxW": 3700,
+      "text": "H · Das Team-Board ist der Ort · Discover, Create, Share docken an",
+      "w": 240,
+      "x": 0,
+      "y": 7276
+    },
+    "heading-l": {
+      "kind": "title1",
+      "maxW": 2440,
+      "text": "Lagerfeuer & Labor · Digital Sparks",
+      "w": 240,
+      "x": 0,
+      "y": 9720
+    },
+    "heading-tablet": {
+      "kind": "title1",
+      "maxW": 3700,
+      "text": "Tablet quer · 1180 × 820",
+      "w": 240,
+      "x": 0,
+      "y": 1000
+    },
+    "heading-j": {
+      "kind": "title1",
+      "maxW": 5900,
+      "text": "J · Lernreise (Etappen-Bentos) → Inhalt (Seiten, Wege, Übersicht)",
+      "x": 0,
+      "y": 11064
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Phasen.dc.html",
+    "Sternbild.dc.html",
+    "Tablet-Pfad.dc.html",
+    "Tablet-Phasen.dc.html",
+    "Tablet-Sternbild.dc.html",
+    "D-Tablet.dc.html",
+    "D-Mobile.dc.html",
+    "E-Tablet.dc.html",
+    "E-Mobile.dc.html",
+    "D-Tablet-Werkzeuge.dc.html",
+    "D-Mobile-Werkzeuge.dc.html",
+    "E-Tablet-Kapitel.dc.html",
+    "E-Mobile-Kapitel.dc.html",
+    "K-Kampagne.dc.html",
+    "F1-Landing.dc.html",
+    "F2-Login.dc.html",
+    "F3-Registrieren.dc.html",
+    "F4-Geraet.dc.html",
+    "G-Tablet.dc.html",
+    "G-Mobile.dc.html",
+    "H0-Start.dc.html",
+    "H1-Board.dc.html",
+    "H2-Discover.dc.html",
+    "H3-Create.dc.html",
+    "H4-Share.dc.html",
+    "L1-Lagerfeuer.dc.html",
+    "L2-Labor.dc.html",
+    "J1-Lernreise-Tablet.dc.html",
+    "J1-Lernreise-Tablet-Lehrkraft.dc.html",
+    "J1-Lernreise-Mobile.dc.html",
+    "J1-Lernreise-Mobile-Lehrkraft.dc.html",
+    "J2-Inhalt-Tablet.dc.html",
+    "J2-Inhalt-Tablet-Wahl.dc.html",
+    "J2-Inhalt-Tablet-Zusammen.dc.html",
+    "J2-Inhalt-Tablet-Uebersicht.dc.html",
+    "J2-Inhalt-Mobile.dc.html",
+    "J2-Inhalt-Mobile-Uebersicht.dc.html"
+  ],
+  "pages": [],
+  "title": "Climate CO₂llaboration – Mobile Journey"
+}

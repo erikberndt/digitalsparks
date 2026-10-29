@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Lernreise – Mobile – Lehrkraft</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&amp;family=Manrope:wght@500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#000}
+a{color:#C9B6FF}a:hover{color:#E2D8FF}
+textarea::placeholder{color:#8A8A8A}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #000000; color: #FFFFFF; font-family: 'Manrope', 'Helvetica Neue', system-ui, sans-serif">
+<div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none">
+<sc-for list="{{stars}}" as="s" hint-placeholder-count="30">
+<span style="position: absolute; left: {{s.x}}px; top: {{s.y}}px; width: {{s.r}}px; height: {{s.r}}px; border-radius: 50%; background: #FFFFFF; opacity: {{s.o}}"></span>
+</sc-for>
+</div>
+
+<header style="position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 20px 0">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A3A3A3">Lernreise</span>
+<h1 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-weight: 400; font-size: 30px; line-height: 1.05">social.me_dia</h1>
+</div>
+<button onClick="{{toggleMenu}}" aria-expanded="{{menuExp}}" aria-label="Profil und Ansicht: {{roleLabel}}" style="display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px 0 4px; border-radius: 999px; border: 1px solid #333333; background: #111111; color: #FFFFFF; cursor: pointer"><span style="width: 36px; height: 36px; border-radius: 50%; background: {{avatarBg}}; color: #000000; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800">{{avatarInitial}}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+</header>
+
+<main style="position: absolute; left: 0; right: 0; top: 96px; bottom: 96px; overflow-y: auto; padding: 0 16px 24px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 0 4px 6px">
+<div style="display: flex; align-items: center; gap: 10px"><h2 style="margin: 0; font-size: 24px; font-weight: 800">{{phaseName}}</h2><sc-if value="{{teacher}}" hint-placeholder-val="{{ false }}"><span style="padding: 3px 10px; border-radius: 999px; background: #2A2410; border: 1px solid #FFE27A; color: #FFE27A; font-size: 12px; font-weight: 800">Lehrkraft</span></sc-if></div>
+<span style="font-size: 13px; font-weight: 600; color: #A3A3A3">{{phaseMeta}}</span>
+</div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="2">
+<sc-for list="{{r.items}}" as="b" hint-placeholder-count="2">
+<button onClick="{{b.pick}}" aria-pressed="{{b.pressed}}" style="flex-shrink: 0; height: {{b.h}}px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; padding: 16px 18px; box-sizing: border-box; border-radius: 22px; background: {{b.bg}}; border: {{b.border}}; box-shadow: {{b.ring}}; color: #FFFFFF; font: inherit; text-align: left; cursor: pointer">
+<span style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; width: 100%">
+<span style="font-family: 'Newsreader', Georgia, serif; font-size: 36px; line-height: 0.85; color: {{b.numColor}}">{{b.no}}</span>
+<sc-if value="{{b.showStatus}}" hint-placeholder-val="{{ false }}"><span style="padding: 5px 10px; border-radius: 999px; background: {{b.chipBg}}; color: {{b.chipColor}}; font-size: 12px; font-weight: 800">{{b.chip}}</span></sc-if>
+<sc-if value="{{b.showKids}}" hint-placeholder-val="{{ false }}"><span style="display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 6px; border-radius: 999px; background: #2A2410; border: 1px solid #FFE27A"><span style="display: flex"><span style="width: 16px; height: 16px; border-radius: 50%; background: #FFE27A; border: 2px solid #2A2410"></span><span style="width: 16px; height: 16px; margin-left: -6px; border-radius: 50%; background: #9BE7C4; border: 2px solid #2A2410"></span><span style="width: 16px; height: 16px; margin-left: -6px; border-radius: 50%; background: #FF9BEA; border: 2px solid #2A2410"></span></span><span style="font-size: 13px; font-weight: 800; color: #FFE27A">{{b.kids}}</span></span></sc-if>
+</span>
+<span style="display: flex; flex-direction: column; gap: 3px; width: 100%">
+<span style="font-size: 18px; font-weight: 800; line-height: 1.2; color: {{b.nameColor}}">{{b.name}}</span>
+<span style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #A3A3A3">{{b.meta}}<sc-if value="{{b.showProgress}}" hint-placeholder-val="{{ false }}"><span style="flex: 1; height: 4px; border-radius: 2px; background: #2E2E2E"><span style="display: block; width: {{b.pct}}%; height: 4px; border-radius: 2px; background: {{accent}}"></span></span></sc-if></span>
+</span>
+</button>
+</sc-for>
+</sc-for>
+</main>
+
+<nav aria-label="Phasen" style="position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 8px 10px 24px; background: #0D0D0D; border-top: 1px solid #222222">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+<button onClick="{{t.pick}}" aria-current="{{t.current}}" style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 60px; background: none; border: none; color: {{t.color}}; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer">
+<span style="width: 52px; height: 30px; border-radius: 15px; background: {{t.bg}}; border: 1px solid #333333; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #FFFFFF">{{t.n}}</span>
+{{t.name}}
+<sc-if value="{{t.showBadge}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -2px; left: 54%; min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 11px; border: 2px solid #0D0D0D; background: #FFE27A; color: #000000; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center">{{t.badge}}</span></sc-if>
+</button>
+</sc-for>
+<button onClick="{{toggleApps}}" aria-expanded="{{appsExp}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 60px; background: none; border: none; color: #FFFFFF; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer"><span style="width: 52px; height: 30px; border-radius: 15px; background: {{appsBg}}; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg></span>Apps</button>
+</nav>
+
+<sc-if value="{{apps}}" hint-placeholder-val="{{ false }}">
+<button onClick="{{closeApps}}" aria-label="Apps schließen" style="position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); border: none; cursor: pointer"></button>
+<section aria-label="Apps" style="position: absolute; left: 0; right: 0; bottom: 0; max-height: 760px; overflow-y: auto; box-sizing: border-box; padding: 10px 16px 30px; border-radius: 28px 28px 0 0; background: #161616; border-top: 1px solid #333333; display: flex; flex-direction: column; gap: 10px">
+<span aria-hidden="true" style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: #3A3A3A"></span>
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 0"><h2 style="margin: 0; font-size: 20px; font-weight: 800">Apps</h2><button onClick="{{closeApps}}" aria-label="Schließen" style="width: 44px; height: 44px; border-radius: 50%; border: none; background: #262626; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<sc-if value="{{teacher}}" hint-placeholder-val="{{ false }}">
+<button style="display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; border-radius: 999px; border: none; background: #FFFFFF; color: #000000; font: inherit; font-size: 16px; font-weight: 800; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg>Schüler*innen einladen</button>
+<span style="text-align: center; font-size: 13px; font-weight: 600; color: #A3A3A3">Klassencode [ABC-123] · 24 dabei</span>
+<span style="margin-top: 6px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #FFE27A">Deine Klasse</span>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<button style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; min-height: 72px; padding: 12px; box-sizing: border-box; border-radius: 16px; border: 1px solid #2E2E2E; background: #1C1C1C; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; text-align: left; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Klassenübersicht</button><button style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; min-height: 72px; padding: 12px; box-sizing: border-box; border-radius: 16px; border: 1px solid #2E2E2E; background: #1C1C1C; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; text-align: left; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="7" r="3"></circle><circle cx="17" cy="7" r="3"></circle><circle cx="7" cy="17" r="3"></circle><circle cx="17" cy="17" r="3"></circle></svg>Teams einteilen</button><button style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; min-height: 72px; padding: 12px; box-sizing: border-box; border-radius: 16px; border: 1px solid #2E2E2E; background: #1C1C1C; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; text-align: left; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>Bildschirme pausieren</button><button style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; min-height: 72px; padding: 12px; box-sizing: border-box; border-radius: 16px; border: 1px solid #2E2E2E; background: #1C1C1C; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; text-align: left; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20"></path><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path><path d="m7 21 5-5 5 5"></path><path d="M10 7l4 2.5-4 2.5z"></path></svg>Präsentation starten</button>
+</div>
+<span style="margin-top: 6px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A3A3A3">Allgemein</span>
+</sc-if>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<button style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; min-height: 72px; padding: 12px; box-sizing: border-box; border-radius: 16px; border: 1px solid #2E2E2E; background: #1C1C1C; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; text-align: left; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 6 4 14"></path><path d="M12 6v14"></path><path d="M8 8v12"></path><path d="M4 4v16"></path></svg>Bibliothek</button><button style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; min-height: 72px; padding: 12px; box-sizing: border-box; border-radius: 16px; border: 1px solid #2E2E2E; background: #1C1C1C; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; text-align: left; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20"></path><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path><path d="m7 21 5-5 5 5"></path></svg>Showroom</button><button style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; min-height: 72px; padding: 12px; box-sizing: border-box; border-radius: 16px; border: 1px solid #2E2E2E; background: #1C1C1C; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; text-align: left; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 15.5a2 2 0 0 0-1.4-1.4l-6.1-1.6a.5.5 0 0 1 0-1l6.1-1.6a2 2 0 0 0 1.4-1.4l1.6-6.1a.5.5 0 0 1 1 0l1.6 6.1a2 2 0 0 0 1.4 1.4l6.1 1.6a.5.5 0 0 1 0 1l-6.1 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"></path></svg>Spark</button><button style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; min-height: 72px; padding: 12px; box-sizing: border-box; border-radius: 16px; border: 1px solid #2E2E2E; background: #1C1C1C; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; text-align: left; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"></path><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"></path></svg>Handbuch</button>
+</div>
+
+</section>
+</sc-if>
+
+<sc-if value="{{hasSel}}" hint-placeholder-val="{{ false }}">
+<button onClick="{{closeSel}}" aria-label="Schließen" style="position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); border: none; cursor: pointer"></button>
+<section aria-label="Etappe" style="position: absolute; left: 0; right: 0; bottom: 0; max-height: 780px; overflow-y: auto; box-sizing: border-box; padding: 10px 20px 30px; border-radius: 28px 28px 0 0; background: #141414; border-top: 1px solid #333333; display: flex; flex-direction: column; gap: 14px">
+<span aria-hidden="true" style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: #3A3A3A"></span>
+<div style="display: flex; align-items: flex-start; gap: 12px">
+<div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #C9B6FF">{{m.eyebrow}}</span>
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-weight: 400; font-size: 30px; line-height: 1.1">{{m.title}}</h2>
+</div>
+<button onClick="{{closeSel}}" aria-label="Schließen" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; border: none; background: #262626; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #D4D4D4">{{m.desc}}</p>
+<div style="display: flex; gap: 24px; padding: 12px 0; border-top: 1px solid #262626; border-bottom: 1px solid #262626">
+<span style="display: flex; flex-direction: column"><span style="font-size: 20px; font-weight: 800">{{m.count}}</span><span style="font-size: 12px; font-weight: 600; color: #A3A3A3">Stationen</span></span>
+<span style="display: flex; flex-direction: column"><span style="font-size: 20px; font-weight: 800">{{m.time}}</span><span style="font-size: 12px; font-weight: 600; color: #A3A3A3">geschätzt</span></span>
+<sc-if value="{{teacher}}" hint-placeholder-val="{{ false }}"><span style="display: flex; flex-direction: column"><span style="font-size: 20px; font-weight: 800; color: #FFE27A">{{m.kids}}</span><span style="font-size: 12px; font-weight: 600; color: #A3A3A3">gerade hier</span></span></sc-if>
+</div>
+<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{m.stations}}" as="s" hint-placeholder-count="4">
+<li style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: {{s.color}}"><span style="width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; background: {{s.numBg}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800">{{s.n}}</span><span style="flex: 1">{{s.t}}</span><sc-if value="{{s.hasTag}}" hint-placeholder-val="{{ false }}"><span style="padding: 2px 8px; border-radius: 999px; border: {{s.tagBorder}}; font-size: 11px; font-weight: 700; color: #D4D4D4">{{s.tag}}</span></sc-if></li>
+</sc-for>
+</ol>
+<a href="J2-Inhalt-Mobile.dc.html" style="margin-top: 4px; min-height: 54px; border-radius: 999px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17px; font-weight: 800; text-decoration: none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="currentColor"></path></svg>{{m.cta}}</a>
+
+</section>
+</sc-if>
+<sc-if value="{{menu}}" hint-placeholder-val="{{ false }}">
+<button onClick="{{closeMenu}}" aria-label="Menü schließen" style="position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.35); border: none; cursor: pointer"></button>
+<section aria-label="Ansicht wechseln" style="position: absolute; top: 72px; right: 16px; width: 300px; box-sizing: border-box; padding: 14px; border-radius: 22px; background: #161616; border: 1px solid #333333; box-shadow: 0 16px 40px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 8px">
+<span style="padding: 2px 4px 6px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A3A3A3">Ansicht</span>
+<button onClick="{{setStudent}}" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 0 14px; border-radius: 16px; border: {{optS.border}}; background: {{optS.bg}}; color: #FFFFFF; font: inherit; text-align: left; cursor: pointer"><span style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: #C9B6FF; color: #000000; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800">S</span><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 800">Schüler*in</span><span style="font-size: 12px; font-weight: 600; color: #A3A3A3">So sieht deine Klasse die Reise</span></span></button>
+<button onClick="{{setTeacher}}" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 0 14px; border-radius: 16px; border: {{optT.border}}; background: {{optT.bg}}; color: #FFFFFF; font: inherit; text-align: left; cursor: pointer"><span style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: #FFE27A; color: #000000; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800">L</span><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 800">Lehrkraft</span><span style="font-size: 12px; font-weight: 600; color: #A3A3A3">Klassen-Apps und wo alle gerade sind</span></span></button>
+</section>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#6E44D9","options":["#6E44D9","#1F6FEB","#C2410C","#0F766E"]},"role":{"editor":"enum","default":"lehrkraft","options":["schueler","lehrkraft"]},"phase":{"editor":"enum","default":"discover","options":["discover","create","share"]},"selected":{"editor":"enum","default":"e3","options":["keine","e1","e2","e3","e4","e5","e6","e7","e8","e9"]},"appsOpen":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+const ET = {
+  e1: { ph: 'discover', no: 1, name: 'Ankommen', min: 10, kids: 0, desc: 'Teamname finden, Handy-Alltag teilen, erste Gedanken zum Thema.', st: [{ t: 'Hi & Teamname' }, { t: 'Mein Handy-Tag' }] },
+  e2: { ph: 'discover', no: 2, name: 'Warum scrollen wir?', min: 20, kids: 3, desc: 'Was der endlose Feed mit unserem Kopf macht.', st: [{ t: 'Der endlose Feed' }, { t: 'Belohnung im Kopf' }, { t: 'Selbstversuch: 10 Minuten', opt: true }, { t: 'Was wir gemerkt haben' }] },
+  e3: { ph: 'discover', no: 3, name: 'Wer entscheidet, was ich sehe?', min: 30, kids: 14, desc: 'Wie Algorithmen sortieren – und warum jede*r einen anderen Feed hat.', st: [{ t: 'Was ist ein Algorithmus?' }, { t: 'Mein Feed, dein Feed', choice: true }, { t: 'Filterblasen' }, { t: 'Gegenstrategien', opt: true }, { t: 'Zusammenfassung' }] },
+  e4: { ph: 'discover', no: 4, name: 'Was passiert mit meinen Daten?', min: 15, kids: 1, desc: 'Welche Spuren wir hinterlassen und wer daran verdient.', st: [{ t: 'Datenspuren' }, { t: 'Wer verdient daran?' }, { t: 'Meine Einstellungen', opt: true }] },
+  e5: { ph: 'create', no: 5, name: 'Ideen finden', min: 15, kids: 6, desc: 'Ein Problem auswählen und gemeinsam Ideen sammeln.', st: [{ t: 'Problem wählen' }, { t: 'Ideen sammeln' }, { t: 'Eine Idee wählen' }] },
+  e6: { ph: 'create', no: 6, name: 'Projekt bauen', min: 45, kids: 0, desc: 'Vom Plan zum Ergebnis – Schritt für Schritt im Team.', st: [{ t: 'Plan machen' }, { t: 'Rollen verteilen' }, { t: 'Bauen', choice: true }, { t: 'Testen' }, { t: 'Feedback holen' }, { t: 'Überarbeiten' }] },
+  e7: { ph: 'create', no: 7, name: 'Feinschliff', min: 15, kids: 0, desc: 'Letzte Verbesserungen und Generalprobe.', st: [{ t: 'Letzte Änderungen' }, { t: 'Generalprobe' }] },
+  e8: { ph: 'share', no: 8, name: 'Präsentieren', min: 20, kids: 0, desc: 'Alle Teams zeigen, was sie gebaut haben.', st: [{ t: 'Vorbereiten' }, { t: 'Präsentation' }] },
+  e9: { ph: 'share', no: 9, name: 'Rückblick', min: 10, kids: 0, desc: 'Was nehmen wir mit?', st: [{ t: 'Rückblick' }] }
+};
+const PH = [
+  { id: 'discover', name: 'Discover', rows: [['e1', 'e2'], ['e3', 'e4']] },
+  { id: 'create', name: 'Create', rows: [['e5', 'e6', 'e7']] },
+  { id: 'share', name: 'Share', rows: [['e8', 'e9']] }
+];
+const PROG = { e1: 'done', e2: 'done', e3: 'current' };
+const CUR_ST = 1;
+const fmt = (m) => (m % 60 === 0 ? '~' + (m / 60) + ' Std' : (m > 60 && m % 30 === 0 ? '~' + String(m / 60).replace('.', ',') + ' Std' : '~' + m + ' Min'));
+const stationState = (id, i) => { const s = PROG[id] || 'open'; if (s === 'done') return 'done'; if (s === 'current') return i < CUR_ST ? 'done' : (i === CUR_ST ? 'current' : 'open'); return 'open'; };
+
+class Component extends DCLogic {
+  makeStars(seed, count, w, h) {
+    let s = seed;
+    const r = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+    const out = [];
+    for (let i = 0; i < count; i++) {
+      const big = r() > 0.88;
+      out.push({ x: Math.round(r() * w), y: Math.round(r() * h), r: big ? 3 : (r() > 0.5 ? 2 : 1), o: (0.2 + r() * 0.5).toFixed(2) });
+    }
+    return out;
+  }
+  renderVals() {
+    const accent = this.props.accent ?? '#6E44D9';
+    const st = this.state || {};
+    const teacher = (st.role ?? (this.props.role ?? 'lehrkraft')) === 'lehrkraft';
+    const phase = st.phase ?? (this.props.phase ?? 'discover');
+    const propSel = this.props.selected ?? 'e3';
+    const sel = st.sel !== undefined ? st.sel : (propSel === 'keine' ? '' : propSel);
+    const apps = st.apps ?? (this.props.appsOpen ?? false);
+    const menu = st.menu ?? false;
+    const ph = PH.find((p) => p.id === phase) || PH[0];
+    const ids = (pid) => Object.keys(ET).filter((k) => ET[k].ph === pid);
+    const tabs = PH.map((p, i) => {
+      const on = p.id === ph.id;
+      const n = ids(p.id).length;
+      const kids = ids(p.id).reduce((a, k) => a + ET[k].kids, 0);
+      return {
+        n: String(i + 1), name: p.name, sub: n + (n === 1 ? ' Etappe' : ' Etappen'),
+        pick: () => this.setState({ phase: p.id, sel: '', apps: false, menu: false }),
+        current: on ? 'page' : 'false', bg: on ? accent : 'transparent', color: on ? '#FFFFFF' : '#D4D4D4',
+        numBg: on ? 'rgba(0,0,0,0.25)' : '#2A2A2A', subColor: on ? '#EDE7FF' : '#A3A3A3',
+        showBadge: teacher && kids > 0, badge: String(kids)
+      };
+    });
+    const mk = (id) => {
+      const e = ET[id]; const s = PROG[id] || 'open'; const isSel = id === sel; const nst = e.st.length;
+      return {
+        no: String(e.no), name: e.name, meta: nst + (nst === 1 ? ' Station' : ' Stationen') + ' · ' + fmt(e.min),
+        grow: e.min, h: Math.round(96 + e.min * 2.4),
+        pick: () => this.setState({ sel: isSel ? '' : id, apps: false, menu: false }), pressed: String(isSel),
+        bg: s === 'current' ? '#1A1528' : (s === 'done' ? '#0D0D0D' : '#141414'),
+        border: s === 'current' ? '1.5px solid ' + accent : '1px solid ' + (s === 'done' ? '#222222' : '#2E2E2E'),
+        ring: isSel ? '0 0 0 3px #FFFFFF' : 'none',
+        numColor: s === 'current' ? '#C9B6FF' : (s === 'done' ? '#5A5A5A' : '#8A8A8A'),
+        nameColor: s === 'done' ? '#BDBDBD' : '#FFFFFF',
+        showStatus: !teacher && s !== 'open', chip: s === 'done' ? 'Erledigt' : 'Hier weiter',
+        chipBg: s === 'done' ? '#1E1E1E' : accent, chipColor: s === 'done' ? '#BDBDBD' : '#FFFFFF',
+        showProgress: !teacher && s === 'current', pct: Math.round((CUR_ST / nst) * 100), progLabel: 'Station ' + (CUR_ST + 1) + ' von ' + nst,
+        showKids: teacher && e.kids > 0, kids: String(e.kids)
+      };
+    };
+    const rows = ph.rows.map((r) => ({ items: r.map(mk) }));
+    const all = ids(ph.id);
+    const total = all.reduce((a, k) => a + ET[k].min, 0);
+    let m = { eyebrow: '', title: '', desc: '', count: '', time: '', kids: '', stations: [], cta: '' };
+    if (sel && ET[sel]) {
+      const e = ET[sel]; const s = PROG[sel] || 'open';
+      m = {
+        eyebrow: PH.find((p) => p.id === e.ph).name + ' · Etappe ' + e.no, title: e.name, desc: e.desc,
+        count: String(e.st.length), time: fmt(e.min), kids: String(e.kids),
+        stations: e.st.map((x, i) => {
+          const ss = stationState(sel, i);
+          return {
+            n: String(i + 1), t: x.t, hasTag: !!(x.opt || x.choice), tag: x.opt ? 'optional' : 'mit Wahl',
+            tagBorder: x.opt ? '1px dashed #7A7A7A' : '1px solid ' + accent,
+            numBg: ss === 'current' ? accent : (ss === 'done' ? '#3A3A3A' : '#1E1E1E'),
+            color: ss === 'done' ? '#A3A3A3' : '#FFFFFF'
+          };
+        }),
+        cta: teacher ? 'Etappe ansehen' : (s === 'current' ? 'Weitermachen' : (s === 'done' ? 'Wiederholen' : 'Starten'))
+      };
+    }
+    const opt = (on) => ({ border: on ? '1.5px solid ' + accent : '1px solid #333333', bg: on ? '#1A1528' : '#1A1A1A' });
+    return {
+      accent, stars: this.makeStars(23, 60, 390, 844), teacher, tabs, rows,
+      phaseName: ph.name,
+      phaseMeta: 'Phase ' + (PH.indexOf(ph) + 1) + ' von 3 · ' + all.length + ' Etappen · ' + fmt(total),
+      hasSel: !!(sel && ET[sel]), m, closeSel: () => this.setState({ sel: '' }),
+      apps, appsExp: String(apps), appsBg: apps ? '#2A2A2A' : 'transparent',
+      toggleApps: () => this.setState({ apps: !apps, sel: '', menu: false }), closeApps: () => this.setState({ apps: false }),
+      menu, menuExp: String(menu), toggleMenu: () => this.setState({ menu: !menu, apps: false }), closeMenu: () => this.setState({ menu: false }),
+      avatarInitial: teacher ? 'L' : 'S', avatarBg: teacher ? '#FFE27A' : '#C9B6FF', roleLabel: teacher ? 'Lehrkraft' : 'Schüler*in',
+      setStudent: () => this.setState({ role: 'schueler', menu: false }),
+      setTeacher: () => this.setState({ role: 'lehrkraft', menu: false }),
+      optS: opt(!teacher), optT: opt(teacher)
+    };
+  }
+}
+</script>
+</body>
+</html>

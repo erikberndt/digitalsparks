@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Lagerfeuer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&amp;family=Manrope:wght@500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#000}
+a{color:#C9B6FF}a:hover{color:#E2D8FF}
+textarea::placeholder{color:#8A8A8A}
+@keyframes ds-pulse{0%,100%{opacity:.35}50%{opacity:.75}}
+</style>
+</helmet>
+<div style="width: 1180px; height: 820px; position: relative; overflow: hidden; background: #000000; color: #FFFFFF; font-family: 'Manrope', 'Helvetica Neue', system-ui, sans-serif">
+<div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none">
+<sc-for list="{{stars}}" as="s" hint-placeholder-count="30">
+<span style="position: absolute; left: {{s.x}}px; top: {{s.y}}px; width: {{s.r}}px; height: {{s.r}}px; border-radius: 50%; background: #FFFFFF; opacity: {{s.o}}"></span>
+</sc-for>
+</div>
+
+<header style="position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 28px 40px 0">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A3A3A3">Lagerfeuer · Discover</span>
+<h1 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-weight: 400; font-size: 34px; line-height: 1.1">POV: KI &amp; Diskriminierung</h1>
+</div>
+<span role="status" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 18px; border-radius: 999px; background: #141414; border: 1px solid #2E2E2E; font-size: 15px; font-weight: 700">Gruppe Alpha<span style="color: #8A8A8A">·</span>{{arrived}} von 4 da</span>
+</header>
+
+<section aria-label="Sammelplatz" style="position: absolute; left: 40px; top: 130px; width: 500px; height: 560px">
+<div aria-hidden="true" style="position: absolute; left: 90px; top: 70px; width: 320px; height: 320px; box-sizing: border-box; border-radius: 50%; border: 1.5px dashed #333333"></div>
+<div aria-hidden="true" style="position: absolute; left: 200px; top: 180px; width: 100px; height: 100px; border-radius: 50%; background: #1A1528; border: 1px solid {{accent}}; display: flex; align-items: center; justify-content: center">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C9B6FF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 15.5a2 2 0 0 0-1.4-1.4l-6.1-1.6a.5.5 0 0 1 0-1l6.1-1.6a2 2 0 0 0 1.4-1.4l1.6-6.1a.5.5 0 0 1 1 0l1.6 6.1a2 2 0 0 0 1.4 1.4l6.1 1.6a.5.5 0 0 1 0 1l-6.1 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"></path></svg>
+</div>
+<sc-for list="{{seats}}" as="p" hint-placeholder-count="4">
+<div style="position: absolute; left: {{p.x}}px; top: {{p.y}}px; width: 120px; display: flex; flex-direction: column; align-items: center; gap: 8px">
+<sc-if value="{{p.here}}" hint-placeholder-val="{{ true }}">
+<span style="width: 60px; height: 60px; box-sizing: border-box; border-radius: 50%; background: #141414; border: 2px solid {{p.ring}}; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800">{{p.initial}}</span>
+<span style="display: flex; flex-direction: column; align-items: center; line-height: 1.3"><span style="font-size: 15px; font-weight: 800">{{p.name}}</span><span style="font-size: 12px; font-weight: 600; color: {{p.statusColor}}">{{p.status}}</span></span>
+</sc-if>
+<sc-if value="{{p.waiting}}" hint-placeholder-val="{{ false }}">
+<span style="width: 60px; height: 60px; border-radius: 50%; background: #1E1E1E; animation: ds-pulse 1.8s ease-in-out infinite"></span>
+<span style="font-size: 12px; font-weight: 600; color: #8A8A8A">kommt noch</span>
+</sc-if>
+</div>
+</sc-for>
+<p style="position: absolute; left: 0; right: 0; top: 500px; margin: 0; text-align: center; font-size: 14px; font-weight: 600; color: #A3A3A3">Das Labor öffnet, wenn alle bereit sind.</p>
+</section>
+
+<div style="position: absolute; left: 600px; right: 40px; top: 130px; bottom: 24px; display: flex; flex-direction: column; gap: 22px">
+
+<article aria-label="Impuls" style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #C9B6FF">Impuls</span>
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-weight: 400; font-size: 26px; line-height: 1.2">Eine KI sortiert Bewerbungen vor. Sie lernt aus den Entscheidungen der letzten Jahre.</h2>
+<button style="align-self: flex-start; margin-top: 6px; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 18px 0 6px; border-radius: 999px; border: 1px solid #333333; background: #111111; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer"><span style="width: 32px; height: 32px; border-radius: 50%; background: #FFFFFF; color: #000000; display: flex; align-items: center; justify-content: center"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></span>Video ansehen · [2:30]</button>
+</article>
+
+<section aria-label="Check-in" style="padding: 20px; border-radius: 24px; background: #121212; border: 1px solid {{checkBorder}}; display: flex; flex-direction: column; gap: 14px">
+<label for="ds-thought" style="font-size: 17px; font-weight: 800">Was ist dein erster Gedanke dazu?</label>
+<textarea id="ds-thought" rows="2" placeholder="Ein Satz reicht." style="resize: none; padding: 14px 16px; border-radius: 16px; border: 1px solid #333333; background: #0A0A0A; color: #FFFFFF; font: inherit; font-size: 16px; line-height: 1.45; outline-color: {{accent}}"></textarea>
+<sc-if value="{{notReady}}" hint-placeholder-val="{{ true }}">
+<button onClick="{{markReady}}" style="min-height: 52px; border-radius: 999px; border: none; background: {{accent}}; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 800; cursor: pointer">Ich bin bereit für das Labor</button>
+</sc-if>
+<sc-if value="{{ready}}" hint-placeholder-val="{{ false }}">
+<button onClick="{{unReady}}" style="min-height: 52px; border-radius: 999px; border: 1px solid {{accent}}; background: #1A1528; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9B6FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Bereit · wartet aufs Team</button>
+</sc-if>
+</section>
+
+<section aria-label="Gedanken der Gruppe" style="display: flex; flex-direction: column">
+<h2 style="margin: 0 0 6px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A3A3A3">Gedanken der Gruppe</h2>
+<sc-for list="{{sparks}}" as="s" hint-placeholder-count="2">
+<div style="display: flex; gap: 14px; padding: 14px 0; border-top: 1px solid #222222">
+<span style="width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; background: #1E1E1E; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800">{{s.initial}}</span>
+<p style="margin: 3px 0 0; font-size: 15px; line-height: 1.45; font-weight: 600; color: #E5E5E5">{{s.text}}</p>
+</div>
+</sc-for>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#6E44D9","options":["#6E44D9","#1F6FEB","#C2410C","#0F766E"]},"$preview":{"width":1180,"height":820}}'>
+class Component extends DCLogic {
+  makeStars(seed, count, w, h) {
+    let s = seed;
+    const r = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+    const out = [];
+    for (let i = 0; i < count; i++) {
+      const big = r() > 0.88;
+      out.push({ x: Math.round(r() * w), y: Math.round(r() * h), r: big ? 3 : (r() > 0.5 ? 2 : 1), o: (0.2 + r() * 0.5).toFixed(2) });
+    }
+    return out;
+  }
+  renderVals() {
+    const accent = this.props.accent ?? '#6E44D9';
+    const st = this.state || {};
+    const ready = st.ready ?? false;
+    const people = [
+      { name: 'Mia', ready: true, x: 190, y: 40 },
+      { name: 'Leo', ready: true, x: 350, y: 200 },
+      { name: 'Jonas', waiting: true, x: 190, y: 360 },
+      { name: 'Du', ready: ready, x: 30, y: 200 }
+    ];
+    const seats = people.map((p) => ({
+      x: p.x, y: p.y, name: p.name, initial: p.name[0],
+      here: !p.waiting, waiting: !!p.waiting,
+      ring: p.ready ? accent : '#333333',
+      status: p.ready ? 'bereit' : 'liest',
+      statusColor: p.ready ? '#C9B6FF' : '#8A8A8A'
+    }));
+    const sparks = [
+      { initial: 'M', text: 'Wenn früher vor allem Männer eingestellt wurden, macht die KI das dann einfach weiter?' },
+      { initial: 'L', text: 'Eine Maschine ist doch neutral – oder?' }
+    ];
+    if (ready) sparks.push({ initial: 'D', text: '[Dein Gedanke]' });
+    return {
+      accent,
+      stars: this.makeStars(41, 70, 1180, 820),
+      arrived: 3, seats, sparks,
+      ready, notReady: !ready,
+      checkBorder: ready ? accent : '#2E2E2E',
+      markReady: () => this.setState({ ready: true }),
+      unReady: () => this.setState({ ready: false })
+    };
+  }
+}
+</script>
+</body>
+</html>
