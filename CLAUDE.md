@@ -18,4 +18,6 @@ Workshop-Materialien und Web-Applets für „Digital Sparks“. GitHub: `erikber
 - `scene`: `env` (`yard` | `class` | `room` + `night`), `cam`, `eye`, `look`, `npcs`, `beats[i]` je Monologzeile. Beat-Aktionen: `look`, `camWalk`, `walk`, `turn`, `wave`, `nod`, `laugh`, `camNod`, `phone`, `screen` (chat/feed/note/call), `wait`.
 - Figuren: Alex (Rückzug, ab 1), Mia (neu hier, ab 1), Sam (Lösungsfigur, ab 2), Jo (Brückenbauer:in, ab 3). Inhalte auf Deutsch.
 - Auch als Claude-Artifact veröffentlicht: https://claude.ai/artifact/Nv1SUADMBLfhGRh7kWm49U (die Artifact-Version hat keinen `<!doctype>`/Viewport-Kopf, den ergänzt das Artifact selbst).
-- Lokal testen: `python3 -m http.server 8765` im Repo, dann `/applets/game-3d-character-select.html`.
+- Katalog-Eintrag `charselect` („Perspektiv-Wechsel 3D“, Entwurf), Vorschau `katalog/previews/charselect.png` (960×600, per Headless-Chrome von `…#stufe-3` gerendert).
+- URL-Hash `#stufe-2` / `#stufe-3` startet direkt in dieser Stufe.
+- Lokal testen: `python3 -m http.server 8766` im Repo, dann `/applets/game-3d-character-select.html` bzw. `/katalog/`.

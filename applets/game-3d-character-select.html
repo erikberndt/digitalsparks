@@ -685,7 +685,7 @@ const stage = { figs: {}, tubes: [], platform: null, particles: null };
   stage.platform = plat;
   const rim = new THREE.Mesh(new THREE.TorusGeometry(6.5, 0.03, 6, 120), new THREE.MeshBasicMaterial({ color: "#ffb938" }));
   rim.rotation.x = Math.PI / 2; rim.position.y = 0.01; stageG.add(rim); stage.rim = rim;
-  const backdrop = new THREE.Mesh(new THREE.CylinderGeometry(14, 14, 12, 64, 1, true, Math.PI * 0.75, Math.PI * 1.5), new THREE.MeshBasicMaterial({ color: "#1b1622", side: THREE.BackSide }));
+  const backdrop = new THREE.Mesh(new THREE.CylinderGeometry(14, 14, 12, 64, 1, true), new THREE.MeshBasicMaterial({ color: "#1b1622", side: THREE.BackSide }));
   backdrop.position.set(0, 5, 0); stageG.add(backdrop);
   // Glühwürmchen-artige Funken im Hintergrund
   const n = 160, g = new THREE.BufferGeometry(), pos = new Float32Array(n * 3);
@@ -1245,7 +1245,8 @@ function loop(now) {
 }
 
 resize();
-setStep(1);
+// #stufe-2 / #stufe-3 öffnet direkt diese Stufe (Testen, Katalog-Vorschau)
+setStep(+((location.hash.match(/^#stufe-([123])$/) || [])[1] || 1));
 $("loading").remove();
 requestAnimationFrame(loop);
 </script>
